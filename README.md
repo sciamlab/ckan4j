@@ -4,19 +4,21 @@ A java library to extend and access core functionalities of CKAN.
 
 Why a CKAN java library
 -----------------------
-[CKAN]() is a complete and performant open-source Data Management System (DMS) built in
-Python by a quite large community behind the Open Knowledge Foundation.
-It powers many data catalogs across the globe including datahub.io,
-catalog.data.gov and data.gov.uk among many other sites.
-CKAN provide a well designed and powerful RPC-style API that expose
-pratically all its core functionalities but when it comes to integration
+[CKAN](http://ckan.org) is a complete and performant open-source Data Management System (DMS)
+built in Python and maintained by a quite large community leaded by the [Open Knowledge Foundation](http://okfn.org/).
+It powers many data catalogs across the globe including [datahub.io](http://datahub.io),
+[catalog.data.gov](http://catalog.data.gov) and [data.gov.uk](http://data.gov.uk/data/search)
+among many other sites.
+CKAN provide a well designed and powerful [RPC-style API](http://docs.ckan.org/en/latest/api/index.html)
+that expose pratically all its core functionalities but when it comes to integration
 with Java based or enterprise scale applications it present some lack of support. 
-So, when we built the opendatahub.it federated catalog we decided to create a
-Java based client library to ease such integration and to decouple our portal and
-data harvester architecture (based on Java tecnologies like Hadoop and Storm)
-
-CKAN4J is the core library of such work released as open-source so that many
-other can benefit from it
+So, when we built the [opendatahub.it](http://www.opendatahub.it) federated catalog of
+Italian open dataset we decided to create a Java based client library and extension to CKAN
+to ease such integration and to decouple the portal and data harvester architecture
+(based on Java tecnologies like [Hadoop](http://hadoop.apache.org/) and 
+[Storm](http://storm.incubator.apache.org/)) from the CKAN itself.
+CKAN4J is the core library of such work released as open-source so that many other can
+benefit from it
 
 
 Features
