@@ -27,19 +27,18 @@ public class CKANLogin {
 	}
 
 	public Response login() {
-			String password_hashed = SciamlabHashUtils.signStringSHA1(time/1000+user+secret);
-			StringBuffer form = new StringBuffer();
-			form.append("<html>");
-			form.append("<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /></head>");
-			form.append("<body onload=\"document.BizPassRedirectForm.submit()\" >");
-			form.append("<form name=\"BizPassRedirectForm\" action=\""+ckan_endpoint+"/login_generic?came_from=/user/logged_in\" method=\"post\">");
-			form.append("<input type=\"hidden\" id=\"field-login\" type=\"text\" name=\"login\" value=\""+user+"\" placeholder=\"\"  />");
-			form.append("<input type=\"hidden\" id=\"field-password\" type=\"password\" name=\"password\" value=\""+time/1000+password_hashed+"\" placeholder=\"\"  />");
-	//		buf.append("<input type=\"hidden\" id=\"field-remember\" type=\"checkbox\" name=\"remember\" value=\"63072000\" checked   />");
-			form.append("</form>");
-			form.append("</body>");
-			form.append("</html>");
-			return Response.ok(form.toString()).build();
+		String password_hashed = SciamlabHashUtils.signStringSHA1(time/1000+user+secret);
+		StringBuffer form = new StringBuffer();
+		form.append("<html>");
+		form.append("<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" /></head>");
+		form.append("<body onload=\"document.BizPassRedirectForm.submit()\" >");
+		form.append("<form name=\"BizPassRedirectForm\" action=\""+ckan_endpoint+"/login_generic?came_from=/user/logged_in\" method=\"post\">");
+		form.append("<input type=\"hidden\" id=\"field-login\" type=\"text\" name=\"login\" value=\""+user+"\" placeholder=\"\"  />");
+		form.append("<input type=\"hidden\" id=\"field-password\" type=\"password\" name=\"password\" value=\""+time/1000+password_hashed+"\" placeholder=\"\"  />");
+		form.append("</form>");
+		form.append("</body>");
+		form.append("</html>");
+		return Response.ok(form.toString()).build();
     }
 	
 	public Response logout(){
@@ -51,7 +50,6 @@ public class CKANLogin {
 		buf.append("</form>");
 		buf.append("</body>");
 		buf.append("</html>");
-
 		return Response.ok(buf.toString()).build();
 	}
 	
