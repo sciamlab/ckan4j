@@ -39,7 +39,7 @@ public class CKANLogin {
 		form.append("</body>");
 		form.append("</html>");
 		return Response.ok(form.toString()).build();
-    }
+	}
 	
 	public Response logout(){
 		StringBuffer buf = new StringBuffer();
@@ -54,11 +54,11 @@ public class CKANLogin {
 	}
 	
 	public static class CKANLoginBuilder{
+		
 		private long time;
 		private final String user;
 		private final String secret;
 		private final String ckan_endpoint;
-		
 		
 		public CKANLoginBuilder(String user, String secret, String ckan_endpoint) {
 			super();
