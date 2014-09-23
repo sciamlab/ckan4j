@@ -23,16 +23,18 @@ benefit from it
 
 Features
 --------
-This is the first Java client library that provide access to the CKAN
-core functionalities and APIs using Java language.
-It also contains extensions to the CKAN API to perform common operations.
-In particular it includes the following features that are not part of CKAN:
+CKAN4J is a Java client library that provide access to the CKAN
+core functionalities and APIs using Java language. The key difference
+respect other Java libraries for CKAN is the extension architecture which
+is designed to extend the CKAN API adding specific enterprise grade
+functionalities like: 
 
-* CKAN dataset and organizations statistics exposed as API
-* Complete Dataset rating mechanism
 * Social Login (supported GitHub, Google+ and Facebook).
   It include capabilities to implement SSO with many other portal software 
-
+* CKAN dataset and organizations statistics exposed as API
+* Complete Dataset rating mechanism
+* Seamless integration with java classification libraries and semantic tools 
+* additional tools
 
 Contribute
 ----------
