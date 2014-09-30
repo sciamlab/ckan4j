@@ -1,21 +1,50 @@
 ckan4j
 ======
-A java library to extend and access core funzionalities of CKAN.
+A java library to extend and access core functionalities of CKAN.
+
+Why a CKAN java library
+-----------------------
+[CKAN](http://ckan.org) is a complete and performant open-source Data Management System (DMS)
+built in Python and maintained by a quite large community leaded by the [Open Knowledge Foundation](http://okfn.org/).
+It powers many data catalogs across the globe including [datahub.io](http://datahub.io),
+[catalog.data.gov](http://catalog.data.gov) and [data.gov.uk](http://data.gov.uk/data/search)
+among many other sites.
+CKAN provide a well designed and powerful [RPC-style API](http://docs.ckan.org/en/latest/api/index.html)
+that expose pratically all its core functionalities but when it comes to integration
+with Java based or enterprise scale applications it present some lack of support. 
+So, when we built the [opendatahub.it](http://www.opendatahub.it) federated catalog of
+Italian open dataset we decided to create a Java based client library and extension to CKAN
+to ease such integration and to decouple the portal and data harvester architecture
+(based on Java tecnologies like [Hadoop](http://hadoop.apache.org/) and 
+[Storm](http://storm.incubator.apache.org/)) from the CKAN itself.
+CKAN4J is the core library of such work released as open-source so that many other can
+benefit from it
 
 
-Usage
------
-
-*Coming soon.*
-
-
-
-
-Download
+Features
 --------
-*Coming soon.*
+CKAN4J is a Java client library that provide access to the CKAN
+core functionalities and APIs using Java language. The key difference
+respect other Java libraries for CKAN is the extension architecture which
+is designed to extend the CKAN API adding specific enterprise grade
+functionalities like: 
 
+* Social Login (supported GitHub, Google+ and Facebook).
+  It include capabilities to implement SSO with many other portal software 
+* CKAN dataset and organizations statistics exposed as API
+* Complete Dataset rating mechanism
+* Seamless integration with java classification libraries and semantic tools 
+* additional tools
 
+Contribute
+----------
+SciamLab is maintaining the library but we are happy to consider your feedbacks
+and contributions and we want this to be the result of a community effort.
+To partecipate you can simply fork the repo and follow the
+typical GitHub flow considering that every pull request must be associated with
+an issue on GitHub
+You can collaborate with [code](https://github.com/sciamlab/ckan4j/pulls) or
+[ideas and bugs](https://github.com/sciamlab/ckan4j/issues)
 
 
 License
@@ -34,4 +63,3 @@ License
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-
