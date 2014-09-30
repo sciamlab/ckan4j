@@ -35,16 +35,22 @@ public class SciamlabStreamUtils {
 			try{
 				log.append("KO]");
 				log.append(" [2nd-->");
-				is = new FileInputStream("conf/"+file);
-			}catch(FileNotFoundException e){
-				log.append("KO]");
-	//			try{
-				log.append(" [3rd-->");
-				is = SciamlabStreamUtils.class.getClassLoader().getResourceAsStream(file);
-				if(is==null){
+				is = new FileInputStream(System.getProperty("catalina.base")+"/conf/"+file);
+			}catch(FileNotFoundException e2){
+				try{
 					log.append("KO]");
+					log.append(" [3rd-->");
+					is = new FileInputStream("conf/"+file);
+				}catch(FileNotFoundException e){
+					log.append("KO]");
+		//			try{
 					log.append(" [4th-->");
-					is = ClassLoader.getSystemResourceAsStream(file);
+					is = SciamlabStreamUtils.class.getClassLoader().getResourceAsStream(file);
+					if(is==null){
+						log.append("KO]");
+						log.append(" [5th-->");
+						is = ClassLoader.getSystemResourceAsStream(file);
+					}
 				}
 			}
 		}
