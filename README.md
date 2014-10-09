@@ -32,9 +32,9 @@ functionalities like:
 * Social Login (supported GitHub, Google+ and Facebook).
   It include capabilities to implement SSO with many other portal software 
 * CKAN dataset and organizations statistics exposed as API
-* Complete Dataset rating mechanism
+* CKAN tags statistics and classification data dump in JSON structures ready for D3.js visualizations
+* CKAN Database extension helper (direct access to CKAN data and manipulation of custom tables) 
 * Seamless integration with java classification libraries and semantic tools 
-* additional tools
 
 Contribute
 ----------
