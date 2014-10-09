@@ -3,6 +3,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -10,8 +11,13 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
+
+import com.sciamlab.ckan4j.exceptions.DAOException;
+import com.sciamlab.ckan4j.model.Role;
+import com.sciamlab.ckan4j.model.User;
 
 /**
  * 
@@ -388,6 +394,46 @@ public abstract class CKANDAO extends SciamlabDAO{
 		}
 
 		return map;
+	}
+	
+	public User getUserBySharedKey(String apikey) {
+		List<Properties> map = this.execQuery("SELECT * FROM \"user\" WHERE apikey='"+apikey+"'", new ArrayList<String>(){{
+			add("id"); add("name"); add("fullname"); add("email");	}});
+		if(map.size()==0) return null;
+		if(map.size()>1) 
+			throw new DAOException("Multiple users retrieved using apikey: "+apikey);
+		Properties p = map.get(0);
+		User u = new User();
+		u.setFirstName(p.getProperty("fullname"));
+		u.setUsername(p.getProperty("name"));
+		u.setEmailAddress(p.getProperty("email"));
+		u.setSecret(apikey);
+		u.setId(p.getProperty("id"));
+		u.getRoles().clear();
+		u.getRoles().addAll(this.getRolesByUserId(p.getProperty("id")));
+		return u;
+	}
+	
+	public List<Role> getRolesByUserId(String id) {
+		Map<String, Properties> map = this.execQuery("SELECT DISTINCT role FROM user_object_role WHERE user_id='"+id+"'", "role", new ArrayList<String>());
+		List<Role> roles = new ArrayList<Role>();
+		if(map.size()==0) {
+			roles.add(Role.anonymous);
+			return roles;
+		}
+		
+		for(String r : map.keySet()){
+			Role role = Role.valueOf(r);
+			if(role!=null){
+				roles.add(role);
+				logger.debug("Role added: "+r);
+			}else{
+				logger.warn(r+"is not identified as a valid role!");
+			}
+		}
+		if(roles.isEmpty())
+			roles.add(Role.anonymous);
+		return roles;
 	}
 
 	

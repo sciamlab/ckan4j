@@ -15,17 +15,23 @@ import com.sciamlab.ckan4j.utils.SciamlabHashUtils;
 public class CKANLogin {
 	
 	private final long time;
+	private final boolean remember;
 	private final String user;
 	private final String secret;
 	private final String ckan_endpoint;
 
-	public CKANLogin(CKANLoginBuilder builder) {
+	private CKANLogin(CKANLoginBuilder builder) {
 		this.time = builder.time;
+		this.remember = builder.remember;
 		this.user = builder.user;
 		this.secret = builder.secret;
 		this.ckan_endpoint = builder.ckan_endpoint;
 	}
 
+	/**
+	 * 
+	 * @return the login form
+	 */
 	public Response login() {
 		String password_hashed = SciamlabHashUtils.signStringSHA1(time/1000+user+secret);
 		StringBuffer form = new StringBuffer();
@@ -35,12 +41,18 @@ public class CKANLogin {
 		form.append("<form name=\"BizPassRedirectForm\" action=\""+ckan_endpoint+"/login_generic?came_from=/user/logged_in\" method=\"post\">");
 		form.append("<input type=\"hidden\" id=\"field-login\" type=\"text\" name=\"login\" value=\""+user+"\" placeholder=\"\"  />");
 		form.append("<input type=\"hidden\" id=\"field-password\" type=\"password\" name=\"password\" value=\""+time/1000+password_hashed+"\" placeholder=\"\"  />");
+		if(remember)
+			form.append("<input type=\"hidden\" id=\"field-remember\" type=\"checkbox\" name=\"remember\" value=\"63072000\" checked />");
 		form.append("</form>");
 		form.append("</body>");
 		form.append("</html>");
 		return Response.ok(form.toString()).build();
 	}
 	
+	/**
+	 * 
+	 * @return the logout form
+	 */
 	public Response logout(){
 		StringBuffer buf = new StringBuffer();
 		buf.append("<html>");
@@ -56,6 +68,7 @@ public class CKANLogin {
 	public static class CKANLoginBuilder{
 		
 		private long time;
+		private boolean remember = false;
 		private final String user;
 		private final String secret;
 		private final String ckan_endpoint;
@@ -70,6 +83,11 @@ public class CKANLogin {
 
 		public CKANLoginBuilder time(long time){
 			this.time = time;
+			return this;
+		}
+		
+		public CKANLoginBuilder remember(boolean remember){
+			this.remember = remember;
 			return this;
 		}
 
