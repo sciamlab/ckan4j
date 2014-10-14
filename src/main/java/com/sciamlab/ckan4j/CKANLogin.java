@@ -1,3 +1,18 @@
+/**
+ * Copyright 2014 Sciamlab s.r.l.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *    
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.sciamlab.ckan4j;
 
 import java.util.Date;
@@ -73,7 +88,11 @@ public class CKANLogin {
 		private final String secret;
 		private final String ckan_endpoint;
 		
-		public CKANLoginBuilder(String user, String secret, String ckan_endpoint) {
+		public static CKANLoginBuilder getInstance(String user, String secret, String ckan_endpoint){
+			return new CKANLoginBuilder(user, secret, ckan_endpoint);
+		}
+		
+		private CKANLoginBuilder(String user, String secret, String ckan_endpoint) {
 			super();
 			this.user = user;
 			this.secret = secret;
