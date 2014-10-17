@@ -19,7 +19,7 @@ import java.util.Date;
 
 import javax.ws.rs.core.Response;
 
-import com.sciamlab.ckan4j.utils.SciamlabHashUtils;
+import com.sciamlab.ckan4j.util.SciamlabHashUtils;
 
 /**
  * 

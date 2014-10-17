@@ -1,4 +1,4 @@
-package com.sciamlab.ckan4j.utils;
+package com.sciamlab.ckan4j.util;
 
 import java.io.IOException;
 

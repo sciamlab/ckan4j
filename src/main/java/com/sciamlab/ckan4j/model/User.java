@@ -34,8 +34,8 @@ import net.sf.json.JSONObject;
 
 import org.apache.commons.codec.language.bm.Rule.RPattern;
 
-import com.sciamlab.ckan4j.utils.JSONizable;
-import com.sciamlab.ckan4j.utils.SciamlabHashUtils;
+import com.sciamlab.ckan4j.util.JSONizable;
+import com.sciamlab.ckan4j.util.SciamlabHashUtils;
 
 public class User implements JSONizable{
 

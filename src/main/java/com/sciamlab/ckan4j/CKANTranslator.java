@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.sciamlab.ckan4j.dao.CKANDAO;
-import com.sciamlab.ckan4j.exceptions.DAOException;
+import com.sciamlab.ckan4j.exception.DAOException;
 
 public class CKANTranslator {
 	
@@ -79,7 +79,7 @@ public class CKANTranslator {
 			String q, String lang_code, boolean translated, boolean not_translated, List<String> package_extra_keys, Integer page_num, Integer page_size){
 		
 		String selectTableSQL = "SELECT terms_only.term, lang_code, term_translation"
-				+ " FROM ("+generateSQLStatementForTermsList(q, package_extra_keys)+") terms_only LEFT JOIN (SELECT * FROM term_translation WHERE lang_code='"+lang_code+"') term_translation_filtered"
+				+ " FROM ("+generateSQLStatementForTermsList(q.toLowerCase().trim(), package_extra_keys)+") terms_only LEFT JOIN (SELECT * FROM term_translation WHERE lang_code='"+lang_code+"') term_translation_filtered"
 				+ " on terms_only.term = term_translation_filtered.term"
 				+ " WHERE 1=1"
 				+ getTranslatedCondition(translated, not_translated)
@@ -107,7 +107,7 @@ public class CKANTranslator {
 			String q, String lang_code, boolean translated, boolean not_translated, List<String> package_extra_keys){
 		
 		String selectTableSQL = "SELECT count(terms_only.term) as terms_count"
-				+ " FROM ("+generateSQLStatementForTermsList(q, package_extra_keys)+") terms_only LEFT JOIN (SELECT * FROM term_translation WHERE lang_code='"+lang_code+"') term_translation_filtered"
+				+ " FROM ("+generateSQLStatementForTermsList(q.toLowerCase().trim(), package_extra_keys)+") terms_only LEFT JOIN (SELECT * FROM term_translation WHERE lang_code='"+lang_code+"') term_translation_filtered"
 				+ " on terms_only.term = term_translation_filtered.term"
 				+ " WHERE 1=1"
 				+ getTranslatedCondition(translated, not_translated)

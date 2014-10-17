@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.sciamlab.ckan4j.exceptions;
-
-import javax.ws.rs.core.Response;
+package com.sciamlab.ckan4j.exception;
 
 /**
  * 
@@ -23,18 +21,19 @@ import javax.ws.rs.core.Response;
  *
  */
 
-public class ForbiddenException extends SciamlabWebApplicationException {
+public class DAOException extends RuntimeException {
 
-	private static final long serialVersionUID = -7587680786259591935L;
+	private static final long serialVersionUID = -2213429135494785501L;
 
-	private static final Response.Status status = Response.Status.FORBIDDEN;
+	public DAOException(){
+		
+	}
 	
-	public ForbiddenException() {
-        this(null);
-    }
-	
-	public ForbiddenException(String applicationMessage) {
-		super(status.getStatusCode(), status.getStatusCode(), status.getReasonPhrase(), applicationMessage);
-    }
+	public DAOException(String msg){
+		super(msg);
+	}
 
+	public DAOException(Throwable t){
+		super(t);
+	}
 }

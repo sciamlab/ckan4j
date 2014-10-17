@@ -31,7 +31,7 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import com.sciamlab.ckan4j.exceptions.DAOException;
+import com.sciamlab.ckan4j.exception.DAOException;
 import com.sciamlab.ckan4j.model.Role;
 import com.sciamlab.ckan4j.model.User;
 

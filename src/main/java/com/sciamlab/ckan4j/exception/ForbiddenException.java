@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.sciamlab.ckan4j.exceptions;
+package com.sciamlab.ckan4j.exception;
 
 import javax.ws.rs.core.Response;
 
@@ -23,17 +23,17 @@ import javax.ws.rs.core.Response;
  *
  */
 
-public class InternalServerErrorException extends SciamlabWebApplicationException {
+public class ForbiddenException extends SciamlabWebApplicationException {
 
 	private static final long serialVersionUID = -7587680786259591935L;
 
-	private static final Response.Status status = Response.Status.INTERNAL_SERVER_ERROR;
+	private static final Response.Status status = Response.Status.FORBIDDEN;
 	
-	public InternalServerErrorException() {
+	public ForbiddenException() {
         this(null);
     }
 	
-	public InternalServerErrorException(String applicationMessage) {
+	public ForbiddenException(String applicationMessage) {
 		super(status.getStatusCode(), status.getStatusCode(), status.getReasonPhrase(), applicationMessage);
     }
 

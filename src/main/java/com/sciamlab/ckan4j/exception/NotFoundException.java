@@ -13,27 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.sciamlab.ckan4j.exceptions;
+package com.sciamlab.ckan4j.exception;
+
+import javax.ws.rs.core.Response;
 
 /**
- * 
- * @author SciamLab
- *
+ * User: porter
+ * Date: 03/05/2012
+ * Time: 12:27
  */
+public class NotFoundException extends SciamlabWebApplicationException {
 
-public class DAOException extends RuntimeException {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 5212139422947303994L;
 
-	private static final long serialVersionUID = -2213429135494785501L;
-
-	public DAOException(){
-		
-	}
+	private static final Response.Status status = Response.Status.NOT_FOUND;
 	
-	public DAOException(String msg){
-		super(msg);
-	}
-
-	public DAOException(Throwable t){
-		super(t);
-	}
+	public NotFoundException() {
+        this(null);
+    }
+	
+	public NotFoundException(String applicationMessage) {
+		super(status.getStatusCode(), status.getStatusCode(), status.getReasonPhrase(), applicationMessage);
+    }
 }

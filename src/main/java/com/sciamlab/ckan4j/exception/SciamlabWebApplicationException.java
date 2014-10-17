@@ -1,4 +1,4 @@
-package com.sciamlab.ckan4j.exceptions;
+package com.sciamlab.ckan4j.exception;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -6,7 +6,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 
-import com.sciamlab.ckan4j.utils.SciamlabErrorResponse;
+import com.sciamlab.ckan4j.util.SciamlabErrorResponse;
 
 /**
  * 
