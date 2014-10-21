@@ -128,6 +128,14 @@ public class CKANTranslator {
 	 * @return the SQL statement as String
 	 */
 	private static String generateSQLStatementForTermsList(String q, List<String> package_extra_keys){
+		String related1 = "SELECT DISTINCT title AS term FROM related"
+				+ " WHERE title IS NOT NULL AND title <> ''"
+				+ ((q!=null && !"".equals(q))?" AND lower(title) like lower('%"+q+"%')":"");
+		
+		String related2 = "SELECT DISTINCT description AS term FROM related"
+				+ " WHERE description IS NOT NULL AND description <> ''"
+				+ ((q!=null && !"".equals(q))?" AND lower(description) like lower('%"+q+"%')":"");
+		
 		String groups1 = "SELECT DISTINCT title AS term FROM \"group\""
 				+ " WHERE title IS NOT NULL AND title <> ''"
 				+ ((q!=null && !"".equals(q))?" AND lower(title) like lower('%"+q+"%')":"");
@@ -169,13 +177,15 @@ public class CKANTranslator {
 		}
 		
 		String selectTableSQL = "SELECT DISTINCT term, lower(term) FROM ("
-				+ groups1+" UNION "
-				+ groups2+" UNION "
-				+ tags+" UNION "
-				+ resources+" UNION "
-				+ resources2+" UNION "
-				+ packages2+" UNION "
-				+ packages3+" UNION "
+				+ related1 +" UNION "
+				+ related2 +" UNION "
+				+ groups1 +" UNION "
+				+ groups2 +" UNION "
+				+ tags +" UNION "
+				+ resources +" UNION "
+				+ resources2 +" UNION "
+				+ packages2 +" UNION "
+				+ packages3 +" UNION "
 				+ package_extras
 				+ ") terms_only ORDER BY lower(term)";
 		

@@ -16,35 +16,18 @@
 
 package com.sciamlab.ckan4j.model;
 
-import java.security.MessageDigest;
+import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-
-import javax.ws.rs.core.Response;
 
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import org.apache.commons.codec.language.bm.Rule.RPattern;
-
 import com.sciamlab.ckan4j.util.JSONizable;
-import com.sciamlab.ckan4j.util.SciamlabHashUtils;
 
-public class User implements JSONizable{
-
-     /**
-     * Add additional salt to password hashing
-     */
-    private static final String HASH_SALT = "d8a8e885-ecce-42bb-8332-894f20f0d8ed";
-
-    private static final int HASH_ITERATIONS = 1000;
+public class User implements JSONizable, Principal{
 
     private String id;
     private String username;
@@ -55,9 +38,7 @@ public class User implements JSONizable{
 
     private List<Role> roles = new ArrayList<Role>();
 
-    private static final int ACCESS_TOKEN_CACHE_SIZE = 10000;
-
-    private String secret;
+    private String api_key;
 
     public User() {
         this(UUID.randomUUID());
@@ -153,52 +134,19 @@ public class User implements JSONizable{
         return getFirstName() + " " + getLastName();
     }
 
-    public void generateSecret() {
-    	if(this.secret==null) 
-    		this.secret = UUID.randomUUID().toString();
+    public void setApiKey(String api_key) {
+    	this.api_key = api_key;
     }
     
-    public void setSecret(String secret) {
-    	this.secret = secret;
+    public String getApiKey() {
+    	return this.api_key;
     }
     
-    public String getSecret() {
-    	return this.secret;
-    }
-    
-    /**
-     * Hash the password using salt values
-     * See https://www.owasp.org/index.php/Hashing_Java
-     *
-     * @param passwordToHash
-     * @return hashed password
-     */
-    public String hashPassword(String passwordToHash) throws Exception {
-        return hashToken(passwordToHash, getId().toString() + HASH_SALT );
-    }
-
-
-    private String hashToken(String token, String salt) throws Exception {
-        return SciamlabHashUtils.byteToBase64(getHash(HASH_ITERATIONS, token, salt.getBytes()));
-    }
-
-    public byte[] getHash(int numberOfIterations, String password, byte[] salt) throws Exception {
-       MessageDigest digest = MessageDigest.getInstance("SHA-256");
-       digest.reset();
-       digest.update(salt);
-       byte[] input = digest.digest(password.getBytes("UTF-8"));
-       for (int i = 0; i < numberOfIterations; i++) {
-           digest.reset();
-           input = digest.digest(input);
-       }
-       return input;
-   }
-
 	@Override
 	public String toString() {
 		return "User [username="+username+", firstName=" + firstName + ", lastName=" + lastName
 				+ ", emailAddress=" + emailAddress + ", hashedPassword="
-				+ hashedPassword + ", roles=" + roles + ", secret=" + secret + "]";
+				+ hashedPassword + ", roles=" + roles + ", api_key=" + api_key + "]";
 	}
 
 	@Override

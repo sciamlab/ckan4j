@@ -412,18 +412,26 @@ public abstract class CKANDAO extends SciamlabDAO{
 		return map;
 	}
 	
-	public User getUserBySharedKey(String apikey) {
-		List<Properties> map = this.execQuery("SELECT * FROM \"user\" WHERE apikey='"+apikey+"'", new ArrayList<String>(){{
-			add("id"); add("name"); add("fullname"); add("email");	}});
+	public User getUserByApiKey(String apikey) {
+		return this.getUser("apikey", apikey);
+	}
+	
+	public User getUserByName(String name) {
+		return this.getUser("name", name);
+	}
+	
+	private User getUser(String col_key, String col_value) {
+		List<Properties> map = this.execQuery("SELECT * FROM \"user\" WHERE "+col_key+"='"+col_value+"'", new ArrayList<String>(){{
+			add("id"); add("name"); add("fullname"); add("email"); add("apikey"); }});
 		if(map.size()==0) return null;
 		if(map.size()>1) 
-			throw new DAOException("Multiple users retrieved using apikey: "+apikey);
+			throw new DAOException("Multiple users retrieved using "+col_key+": "+col_value);
 		Properties p = map.get(0);
 		User u = new User();
 		u.setFirstName(p.getProperty("fullname"));
 		u.setUsername(p.getProperty("name"));
 		u.setEmailAddress(p.getProperty("email"));
-		u.setSecret(apikey);
+		u.setApiKey(p.getProperty("apikey"));
 		u.setId(p.getProperty("id"));
 		u.getRoles().clear();
 		u.getRoles().addAll(this.getRolesByUserId(p.getProperty("id")));
