@@ -21,13 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONString;
 
-import com.sciamlab.ckan4j.util.JSONizable;
-
-public class User implements JSONizable, Principal{
+public class User implements JSONString, Principal{
 
     private String id;
     private String username;
@@ -150,12 +148,7 @@ public class User implements JSONizable, Principal{
 	}
 
 	@Override
-	public JSON toJSON() {
-		return toJSON(true);
-	}
-
-	@Override
-	public JSON toJSON(boolean goDeep) {
+	public String toJSONString() {
 		JSONObject result = new JSONObject();
 		User user = this;
         result.put("first_name", user.getFirstName());
@@ -164,10 +157,10 @@ public class User implements JSONizable, Principal{
         result.put("id", user.getId());
 		JSONArray roles = new JSONArray();
 		for(Role r : user.getRoles()){
-			roles.add(r.name());
+			roles.put(r.name());
 		}
 		result.put("roles", roles);
-		return result;
+		return result.toString();
 	}
 
 

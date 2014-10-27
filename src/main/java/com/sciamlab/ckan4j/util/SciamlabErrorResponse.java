@@ -1,9 +1,8 @@
 package com.sciamlab.ckan4j.util;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
-
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
+import org.json.JSONString;
 
 /**
  * 
@@ -11,7 +10,7 @@ import org.apache.log4j.Logger;
  *
  */
 
-public class SciamlabErrorResponse implements JSONizable{
+public class SciamlabErrorResponse implements JSONString{
 	
 	private static final Logger logger = Logger.getLogger(SciamlabErrorResponse.class);
 	
@@ -44,16 +43,13 @@ public class SciamlabErrorResponse implements JSONizable{
         this.applicationMessage = applicationMessage;
     }
     
-    public JSON toJSON() {
+	@Override
+	public String toJSONString() {
 		JSONObject json = new JSONObject();
 		json.put("code", errorCode);
 		json.put("error", errorMessage);
 		if(applicationMessage != null && !"".equals(applicationMessage))
 			json.put("msg", applicationMessage);
-		return json;
-	}
-
-	public JSON toJSON(boolean goDeep) {
-		return toJSON();
+		return json.toString();
 	}
 }

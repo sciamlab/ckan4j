@@ -32,7 +32,7 @@ public abstract class SciamlabWebApplicationException extends WebApplicationExce
 
     @Override
     public Response getResponse() {
-    	return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(getErrorResponse().toJSON().toString()).build();
+    	return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(getErrorResponse().toJSONString()).build();
     }
 
     public SciamlabErrorResponse getErrorResponse() {

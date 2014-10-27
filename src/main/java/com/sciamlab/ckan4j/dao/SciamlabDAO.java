@@ -25,10 +25,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.sciamlab.ckan4j.exception.DAOException;
 import com.sciamlab.ckan4j.util.SciamlabStringUtils;
@@ -167,7 +166,7 @@ public abstract class SciamlabDAO {
 				String val = p.getProperty((String)col).trim();
 				gara.put((String)col, (!"".equals(val)) ? val : "-");
 			}
-			array.add(gara);
+			array.put(gara);
 		}
 		return array;
 	}
@@ -187,7 +186,7 @@ public abstract class SciamlabDAO {
 				String val = p.getProperty((String)col);
 				json.put(col, (val!=null && !"".equals(val)) ? val.trim() : "-");
 			}
-			array.add(json);
+			array.put(json);
 		}
 		return array;
 	}
