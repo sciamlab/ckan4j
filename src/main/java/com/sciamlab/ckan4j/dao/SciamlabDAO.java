@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 package com.sciamlab.ckan4j.dao;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import com.sciamlab.ckan4j.exception.DAOException;
-import com.sciamlab.ckan4j.util.SciamlabStringUtils;
+import com.sciamlab.ckan4j.exception.InternalServerErrorException;
+import com.sciamlab.ckan4j.util.SciamlabStreamUtils;
 
 /**
  * 
@@ -49,7 +54,6 @@ public abstract class SciamlabDAO {
 		Statement statement = null;
 		ResultSet result = null;
 		try {
-//				String query = "SELECT FROM WHERE";
 			connection = this.getConnection();
 			statement = connection.createStatement();
 			logger.debug(query);
@@ -57,7 +61,7 @@ public abstract class SciamlabDAO {
 			
 			Map<String, Properties> map = new TreeMap<String, Properties>();
 			while(result.next()){
-				Properties values = new Properties();
+				LinkedProperties values = new LinkedProperties();
 				for(String c : columns){
 					values.put(c, (result.getString(c)!=null)?result.getString(c):"");
 				}
@@ -68,9 +72,9 @@ public abstract class SciamlabDAO {
 		} catch (Exception e) {
 			throw new DAOException(e);
 		} finally{
-			if (result != null) try { result.close(); } catch (SQLException e) { logger.error(SciamlabStringUtils.stackTraceToString(e)); }
-	        if (statement != null) try { statement.close(); } catch (SQLException e) { logger.error(SciamlabStringUtils.stackTraceToString(e)); }
-	        if (connection != null) try { connection.close(); } catch (SQLException e) { logger.error(SciamlabStringUtils.stackTraceToString(e)); }
+			if (result != null) try { result.close(); } catch (SQLException e) { logger.error(e.getMessage(), e); }
+	        if (statement != null) try { statement.close(); } catch (SQLException e) { logger.error(e.getMessage(), e); }
+	        if (connection != null) try { connection.close(); } catch (SQLException e) { logger.error(e.getMessage(), e); }
 		}
 	}
 	
@@ -87,7 +91,6 @@ public abstract class SciamlabDAO {
 		Statement statement = null;
 		ResultSet result = null;
 		try {
-//				String query = "SELECT FROM WHERE";
 			connection = this.getConnection();
 			statement = connection.createStatement();
 			logger.debug(query);
@@ -95,7 +98,7 @@ public abstract class SciamlabDAO {
 			
 			List<Properties> map = new ArrayList<Properties>();
 			while(result.next()){
-				Properties values = new Properties();
+				LinkedProperties values = new LinkedProperties();
 				for(String c : columns){
 					values.put(c, (result.getString(c)!=null)?result.getString(c):"");
 				}
@@ -106,9 +109,9 @@ public abstract class SciamlabDAO {
 		} catch (Exception e) {
 			throw new DAOException(e);
 		} finally{
-			if (result != null) try { result.close(); } catch (SQLException e) { logger.error(SciamlabStringUtils.stackTraceToString(e)); }
-	        if (statement != null) try { statement.close(); } catch (SQLException e) { logger.error(SciamlabStringUtils.stackTraceToString(e)); }
-	        if (connection != null) try { connection.close(); } catch (SQLException e) { logger.error(SciamlabStringUtils.stackTraceToString(e)); }
+			if (result != null) try { result.close(); } catch (SQLException e) { logger.error(e.getMessage(), e); }
+	        if (statement != null) try { statement.close(); } catch (SQLException e) { logger.error(e.getMessage(), e); }
+	        if (connection != null) try { connection.close(); } catch (SQLException e) { logger.error(e.getMessage(), e); }
 		}
 	}
 	
@@ -124,7 +127,6 @@ public abstract class SciamlabDAO {
 		Statement statement = null;
 		ResultSet result = null;
 		try {
-//				String query = "SELECT FROM WHERE";
 			connection = this.getConnection();
 			statement = connection.createStatement();
 			logger.debug(query);
@@ -134,7 +136,7 @@ public abstract class SciamlabDAO {
 			
 			List<Properties> map = new ArrayList<Properties>();
 			while(result.next()){
-				Properties values = new Properties();
+				LinkedProperties values = new LinkedProperties();
 				for(int i=1 ; i<=metadata.getColumnCount() ; i++){
 					String c = metadata.getColumnName(i);
 					values.put(c, (result.getString(c)!=null)?result.getString(c):"");
@@ -146,51 +148,29 @@ public abstract class SciamlabDAO {
 		} catch (Exception e) {
 			throw new DAOException(e);
 		} finally{
-			if (result != null) try { result.close(); } catch (SQLException e) { logger.error(SciamlabStringUtils.stackTraceToString(e)); }
-	        if (statement != null) try { statement.close(); } catch (SQLException e) { logger.error(SciamlabStringUtils.stackTraceToString(e)); }
-	        if (connection != null) try { connection.close(); } catch (SQLException e) { logger.error(SciamlabStringUtils.stackTraceToString(e)); }
+			if (result != null) try { result.close(); } catch (SQLException e) { logger.error(e.getMessage(), e); }
+	        if (statement != null) try { statement.close(); } catch (SQLException e) { logger.error(e.getMessage(), e); }
+	        if (connection != null) try { connection.close(); } catch (SQLException e) { logger.error(e.getMessage(), e); }
 		}
 	}
 	
 	/**
-	 * Transforms a List of Properties into a JSONArray of JSONObject
+	 * Execs a select statement reading from InputStream returning a list of record as a Properties object.
+	 * Each value is labeled with the column name from the select statement
 	 * 
-	 * @param list
+	 * @param query
 	 * @return
 	 */
-	public JSONArray transformToJSONArray(List<Properties> list) {
-		JSONArray array = new JSONArray();
-		for(Properties p : list){
-			JSONObject gara = new JSONObject();
-			for(Object col : p.keySet()){ //columns){
-				String val = p.getProperty((String)col).trim();
-				gara.put((String)col, (!"".equals(val)) ? val : "-");
-			}
-			array.put(gara);
+	public List<Properties> execQuery(InputStream is){
+		List<Properties> result = new ArrayList<Properties>();
+		try {
+			result = this.execQuery(SciamlabStreamUtils.convertStreamToString(is).replaceAll("\n", " "));
+		}finally{
+			if(is != null) try { is.close(); } catch (IOException e) { logger.error(e.getMessage(), e);	}
 		}
-		return array;
+		return result;
 	}
-
-	/**
-	 * Transforms a List of Properties into a JSONArray of JSONObject ordered using the "columns" list
-	 * 
-	 * @param list
-	 * @param columns
-	 * @return
-	 */
-	public JSONArray transformToJSONArray(List<Properties> list, List<String> columns) {
-		JSONArray array = new JSONArray();
-		for(Properties p : list){
-			JSONObject json = new JSONObject();
-			for(String col : columns){
-				String val = p.getProperty((String)col);
-				json.put(col, (val!=null && !"".equals(val)) ? val.trim() : "-");
-			}
-			array.put(json);
-		}
-		return array;
-	}
-
+	
 	/**
 	 * Execs a SQL update
 	 * 
@@ -201,7 +181,6 @@ public abstract class SciamlabDAO {
 		Connection connection = null;
 		Statement statement = null;
 		try {
-//				String query = "SELECT FROM WHERE";
 			connection = this.getConnection();
 			statement = connection.createStatement();
 			logger.debug(stm);
@@ -209,11 +188,11 @@ public abstract class SciamlabDAO {
 			return statement.executeUpdate(stm);
 			
 		} catch (Exception e) {
-			logger.error(SciamlabStringUtils.stackTraceToString(e));
+			logger.error(e.getMessage(), e);
 			throw new DAOException(e);
 		} finally{
-	        if (statement != null) try { statement.close(); } catch (SQLException e) { logger.error(SciamlabStringUtils.stackTraceToString(e)); }
-	        if (connection != null) try { connection.close(); } catch (SQLException e) { logger.error(SciamlabStringUtils.stackTraceToString(e)); }
+	        if (statement != null) try { statement.close(); } catch (SQLException e) { logger.error(e.getMessage(), e); }
+	        if (connection != null) try { connection.close(); } catch (SQLException e) { logger.error(e.getMessage(), e); }
 		}
 	}
 	
@@ -227,7 +206,6 @@ public abstract class SciamlabDAO {
 		Connection connection = null;
 		Statement statement = null;
 		try {
-//				String query = "SELECT FROM WHERE";
 			connection = this.getConnection();
 			statement = connection.createStatement();
 			for(String stm : stmList){
@@ -238,12 +216,31 @@ public abstract class SciamlabDAO {
 			return statement.executeBatch();
 			
 		} catch (Exception e) {
-			logger.error(SciamlabStringUtils.stackTraceToString(e));
+			logger.error(e.getMessage(), e);
 			throw new DAOException(e);
 		} finally{
-	        if (statement != null) try { statement.close(); } catch (SQLException e) { logger.error(SciamlabStringUtils.stackTraceToString(e)); }
-	        if (connection != null) try { connection.close(); } catch (SQLException e) { logger.error(SciamlabStringUtils.stackTraceToString(e)); }
+	        if (statement != null) try { statement.close(); } catch (SQLException e) { logger.error(e.getMessage(), e); }
+	        if (connection != null) try { connection.close(); } catch (SQLException e) { logger.error(e.getMessage(), e); }
 		}
+	}
+	
+	public class LinkedProperties extends Properties {
+
+	    private static final long serialVersionUID = 1L;
+		private final LinkedHashSet<Object> keys = new LinkedHashSet<Object>();
+
+	    public Enumeration<Object> keys() {
+	        return Collections.<Object>enumeration(keys);
+	    }
+	    
+	    public Set<Object> keySet() {
+	        return keys;
+	    }
+
+	    public Object put(Object key, Object value) {
+	        keys.add(key);
+	        return super.put(key, value);
+	    }
 	}
 	
 }

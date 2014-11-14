@@ -17,6 +17,8 @@ package com.sciamlab.ckan4j.exception;
 
 import javax.ws.rs.core.Response;
 
+import com.sciamlab.ckan4j.util.SciamlabStringUtils;
+
 /**
  * 
  * @author SciamLab
@@ -30,7 +32,11 @@ public class InternalServerErrorException extends SciamlabWebApplicationExceptio
 	private static final Response.Status status = Response.Status.INTERNAL_SERVER_ERROR;
 	
 	public InternalServerErrorException() {
-        this(null);
+        this("");
+    }
+	
+	public InternalServerErrorException(Exception e) {
+        this(SciamlabStringUtils.stackTraceToString(e));
     }
 	
 	public InternalServerErrorException(String applicationMessage) {

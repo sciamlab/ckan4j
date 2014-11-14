@@ -210,7 +210,7 @@ public class HTTPClient {
 //					new URL("https://www.googleapis.com/urlshortener/v1/url"), body.toString(), MediaType.APPLICATION_JSON_TYPE, params, header);
 //			json = (JSONObject) JSONSerializer.toJSON(result);
 //		} catch (Exception e) {
-//			logger.error(SciamlabStringUtils.stackTraceToString(e));
+//			logger.error(e.getMessage(), e);
 //		}
 //			if(json!=null && json.containsKey("id")){
 //				return new URL(json.getString("id"));

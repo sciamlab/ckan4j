@@ -33,7 +33,7 @@ public class CKANTranslator {
 	}
 	
 	/**
-	 * Inserts a translation into CKAN for the given language
+	 * Inserts a translation for the given language
 	 * 
 	 * @param term_text
 	 * @param lang_code
@@ -222,8 +222,4 @@ public class CKANTranslator {
 		}
 	}
 	
-	public static void main(String[] args) {
-		new CKANTranslatorBuilder(null).build().getTerms("", "en", true, true, new ArrayList<String>(){{add("microtheme");add("theme");}}, 1, 50);
-	}
-
 }
