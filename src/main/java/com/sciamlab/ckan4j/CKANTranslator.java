@@ -16,7 +16,6 @@
 package com.sciamlab.ckan4j;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -39,12 +38,10 @@ public class CKANTranslator {
 	 * @param lang_code
 	 * @param term_translation
 	 */
-	public void translate(String term, String lang_code, String term_translation){
-		String updateTableSQL = "UPDATE term_translation SET term_translation='"+term_translation+"'"
-				+ " WHERE term='"+term+"' AND lang_code='"+lang_code+"'";
-		
+	public void translate(final String term, final String lang_code, final String term_translation){
+		String updateTableSQL = "UPDATE term_translation SET term_translation = ? WHERE term = ? AND lang_code = ?";
 		// execs the update SQL statement
-		int row_count = dao.execUpdate(updateTableSQL);
+		int row_count = dao.execUpdate(updateTableSQL, new ArrayList<Object>(){{ add(term_translation); add(term); add(lang_code); }});
 		if(row_count>1){
 			throw new DAOException("UNIQUE constraint on [term, lang_code] violated for ["+term+", "+lang_code+"]. Updated "+row_count+" rows!");
 		}else if(row_count==1){
@@ -53,11 +50,8 @@ public class CKANTranslator {
 		}
 		
 		//the row is not present in the database, so it is inserted
-		String insertTableSQL = "INSERT INTO term_translation"
-				+ "(term, lang_code, term_translation)" 
-				+ " VALUES "
-				+ "('"+term+"', '"+lang_code+"', '"+term_translation+"')";
-		dao.execUpdate(insertTableSQL);
+		String insertTableSQL = "INSERT INTO term_translation (term, lang_code, term_translation) VALUES (?, ?, ?)";
+		dao.execUpdate(insertTableSQL, new ArrayList<Object>(){{ add(term); add(lang_code); add(term_translation); }});
 	}
 	
 	/**
@@ -78,16 +72,20 @@ public class CKANTranslator {
 	public Map<String, Properties> getTerms(
 			String q, String lang_code, boolean translated, boolean not_translated, List<String> package_extra_keys, Integer page_num, Integer page_size){
 		
+		List<Object> params = new ArrayList<Object>();
 		String selectTableSQL = "SELECT terms_only.term, lang_code, term_translation"
-				+ " FROM ("+generateSQLStatementForTermsList(q.toLowerCase().trim(), package_extra_keys)+") terms_only LEFT JOIN (SELECT * FROM term_translation WHERE lang_code='"+lang_code+"') term_translation_filtered"
+				+ " FROM ("+generateSQLStatementForTermsList(q.toLowerCase().trim(), package_extra_keys, params)+") terms_only"
+				+ " LEFT JOIN (SELECT * FROM term_translation WHERE lang_code = '"+lang_code+"') term_translation_filtered"
 				+ " on terms_only.term = term_translation_filtered.term"
 				+ " WHERE 1=1"
-				+ getTranslatedCondition(translated, not_translated)
-				+ ((page_num!=null && page_size!=null && page_num>0 && page_size>0)?" LIMIT "+page_size+" OFFSET "+(page_size*(page_num-1)):"")
-				+ ";";
-		
+				+ getTranslatedCondition(translated, not_translated);
+		if(page_num!=null && page_size!=null && page_num>0 && page_size>0){
+			selectTableSQL += " LIMIT ? OFFSET ?";
+			params.add(page_size);
+			params.add(page_size*(page_num-1));
+		}
 		// execs the select SQL statement
-		Map<String, Properties> result = dao.execQuery(selectTableSQL, "term", 
+		Map<String, Properties> result = dao.execQuery(selectTableSQL, params, "term", 
 				new ArrayList<String>(){{ add("term"); add("lang_code"); add("term_translation"); }});
 		
 		return result;
@@ -106,16 +104,15 @@ public class CKANTranslator {
 	public int getTermsCount(
 			String q, String lang_code, boolean translated, boolean not_translated, List<String> package_extra_keys){
 		
+		List<Object> params = new ArrayList<Object>();
 		String selectTableSQL = "SELECT count(terms_only.term) as terms_count"
-				+ " FROM ("+generateSQLStatementForTermsList(q.toLowerCase().trim(), package_extra_keys)+") terms_only LEFT JOIN (SELECT * FROM term_translation WHERE lang_code='"+lang_code+"') term_translation_filtered"
+				+ " FROM ("+generateSQLStatementForTermsList(q.toLowerCase().trim(), package_extra_keys, params)+") terms_only"
+				+ " LEFT JOIN (SELECT * FROM term_translation WHERE lang_code='"+lang_code+"') term_translation_filtered"
 				+ " on terms_only.term = term_translation_filtered.term"
-				+ " WHERE 1=1"
-				+ getTranslatedCondition(translated, not_translated)
-				+ ";";
+				+ " WHERE 1=1" + getTranslatedCondition(translated, not_translated);
 		
 		// execs the select SQL statement
-		List<Properties> result = dao.execQuery(selectTableSQL, 
-				new ArrayList<String>(){{ add("terms_count"); }});
+		List<Properties> result = dao.execQuery(selectTableSQL, params, new ArrayList<String>(){{ add("terms_count"); }});
 		int count = Integer.parseInt(result.get(0).getProperty("terms_count"));
 		return count;
 	}
@@ -127,50 +124,82 @@ public class CKANTranslator {
 	 * @param package_extra_keys
 	 * @return the SQL statement as String
 	 */
-	private static String generateSQLStatementForTermsList(String q, List<String> package_extra_keys){
+	private String generateSQLStatementForTermsList(String q, List<String> package_extra_keys, List<Object> params){
 		String related1 = "SELECT DISTINCT title AS term FROM related"
-				+ " WHERE title IS NOT NULL AND title <> ''"
-				+ ((q!=null && !"".equals(q))?" AND lower(title) like lower('%"+q+"%')":"");
+				+ " WHERE title IS NOT NULL AND title <> ''";
+		if(q!=null && !"".equals(q)){
+			related1 += " AND lower(title) like ?";
+			params.add("%"+q+"%");
+		}
 		
 		String related2 = "SELECT DISTINCT description AS term FROM related"
-				+ " WHERE description IS NOT NULL AND description <> ''"
-				+ ((q!=null && !"".equals(q))?" AND lower(description) like lower('%"+q+"%')":"");
+				+ " WHERE description IS NOT NULL AND description <> ''";
+		if(q!=null && !"".equals(q)){
+			related2 += " AND lower(description) like ?";
+			params.add("%"+q+"%");
+		}
 		
 		String groups1 = "SELECT DISTINCT title AS term FROM \"group\""
-				+ " WHERE title IS NOT NULL AND title <> ''"
-				+ ((q!=null && !"".equals(q))?" AND lower(title) like lower('%"+q+"%')":"");
+				+ " WHERE title IS NOT NULL AND title <> ''";
+		if(q!=null && !"".equals(q)){
+			groups1 += " AND lower(title) like ?";
+			params.add("%"+q+"%");
+		}
 		
 		String groups2 = "SELECT DISTINCT description AS term FROM \"group\""
-				+ " WHERE description IS NOT NULL AND description <> ''"
-				+ ((q!=null && !"".equals(q))?" AND lower(description) like lower('%"+q+"%')":"");
+				+ " WHERE description IS NOT NULL AND description <> ''";
+		if(q!=null && !"".equals(q)){
+			groups2 += " AND lower(description) like ?";
+			params.add("%"+q+"%");
+		}
 		
 		String tags = "SELECT DISTINCT name AS term FROM tag"
-				+ " WHERE name IS NOT NULL AND name <> ''"
-				+ ((q!=null && !"".equals(q))?" AND lower(name) like lower('%"+q+"%')":"");
+				+ " WHERE name IS NOT NULL AND name <> ''";
+		if(q!=null && !"".equals(q)){
+			tags += " AND lower(name) like ?";
+			params.add("%"+q+"%");
+		}
 		
 		String resources = "SELECT DISTINCT description AS term FROM resource"
-				+ " WHERE description IS NOT NULL AND description <> ''"
-				+((q!=null && !"".equals(q))?" AND lower(description) like lower('%"+q+"%')":"");
+				+ " WHERE description IS NOT NULL AND description <> ''";
+		if(q!=null && !"".equals(q)){
+			resources += " AND lower(description) like ?";
+			params.add("%"+q+"%");
+		}
 		
 		String resources2 = "SELECT DISTINCT name AS term FROM resource"
-				+ " WHERE name IS NOT NULL AND name <> ''"
-				+((q!=null && !"".equals(q))?" AND lower(name) like lower('%"+q+"%')":"");
+				+ " WHERE name IS NOT NULL AND name <> ''";
+		if(q!=null && !"".equals(q)){
+			resources2 += " AND lower(name) like ?";
+			params.add("%"+q+"%");
+		}
 		
 		String packages2 = "SELECT DISTINCT title AS term FROM package"
-				+ " WHERE title IS NOT NULL AND title <> ''"
-				+((q!=null && !"".equals(q))?" AND lower(title) like lower('%"+q+"%')":"");
+				+ " WHERE title IS NOT NULL AND title <> ''";
+		if(q!=null && !"".equals(q)){
+			packages2 += " AND lower(title) like ?";
+			params.add("%"+q+"%");
+		}
 		
 		String packages3 = "SELECT DISTINCT notes AS term FROM package"
-				+ " WHERE notes IS NOT NULL AND notes <> ''"
-				+((q!=null && !"".equals(q))?" AND lower(notes) like lower('%"+q+"%')":"");
+				+ " WHERE notes IS NOT NULL AND notes <> ''";
+		if(q!=null && !"".equals(q)){
+			packages3 += " AND lower(notes) like ?";
+			params.add("%"+q+"%");
+		}
 		
 		String package_extras = "SELECT DISTINCT value AS term FROM package_extra"
-				+ " WHERE value IS NOT NULL AND value <> ''"
-				+ ((q!=null && !"".equals(q))?" AND lower(value) like lower('%"+q+"%')":"");
+				+ " WHERE value IS NOT NULL AND value <> ''";
+		if(q!=null && !"".equals(q)){
+			package_extras += " AND lower(value) like ?";
+			params.add("%"+q+"%");
+		}
+				
 		if(package_extra_keys!=null && !package_extra_keys.isEmpty()){
 			package_extras += " AND key IN (";
 			for(String key : package_extra_keys){
-				package_extras += "'"+key+"',";
+				package_extras += "?,";
+				params.add(key);
 			}
 			package_extras = package_extras.substring(0, package_extras.length()-1);
 			package_extras += ")";
@@ -192,7 +221,7 @@ public class CKANTranslator {
 		return selectTableSQL;
 	}
 	
-	private static String getTranslatedCondition(boolean translated, boolean not_translated){
+	private String getTranslatedCondition(boolean translated, boolean not_translated){
 		String translated_clause = "";
 		if(translated && !not_translated){
 			translated_clause = " AND term_translation IS NOT NULL";

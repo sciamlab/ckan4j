@@ -8,6 +8,5 @@ import javax.ws.rs.NameBinding;
 @NameBinding
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ApiKeyAuthentication {
-//	public enum AuthenticationType { SIMPLE, OAUTH }
-//    AuthenticationType type() default AuthenticationType.SIMPLE;
+
 }

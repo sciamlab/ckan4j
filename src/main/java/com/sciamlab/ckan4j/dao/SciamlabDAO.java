@@ -17,6 +17,7 @@ package com.sciamlab.ckan4j.dao;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -49,15 +50,19 @@ public abstract class SciamlabDAO {
 	
 	protected abstract Connection getConnection() throws SQLException;
 	
-	public Map<String, Properties> execQuery(String query, String key, List<String> columns){
+	public Map<String, Properties> execQuery(String query, List<Object> params, String key, List<String> columns){
 		Connection connection = null;
-		Statement statement = null;
+		PreparedStatement statement = null;
 		ResultSet result = null;
 		try {
 			connection = this.getConnection();
-			statement = connection.createStatement();
-			logger.debug(query);
-			result = statement.executeQuery(query);
+			statement = connection.prepareStatement(query);
+			if (params!=null)
+				for (int i = 1; i <= params.size(); i++) 
+					statement.setObject(i, params.get(i - 1));
+			logger.debug(statement);
+			statement.execute();
+			result = statement.getResultSet();
 			
 			Map<String, Properties> map = new TreeMap<String, Properties>();
 			while(result.next()){
@@ -86,15 +91,19 @@ public abstract class SciamlabDAO {
 	 * @param columns
 	 * @return
 	 */
-	public List<Properties> execQuery(String query, List<String> columns){
+	public List<Properties> execQuery(String query, List<Object> params, List<String> columns){
 		Connection connection = null;
-		Statement statement = null;
+		PreparedStatement statement = null;
 		ResultSet result = null;
 		try {
 			connection = this.getConnection();
-			statement = connection.createStatement();
-			logger.debug(query);
-			result = statement.executeQuery(query);
+			statement = connection.prepareStatement(query);
+			if (params!=null)
+				for (int i = 1; i <= params.size(); i++) 
+					statement.setObject(i, params.get(i - 1));
+			logger.debug(statement);
+			statement.execute();
+			result = statement.getResultSet();
 			
 			List<Properties> map = new ArrayList<Properties>();
 			while(result.next()){
@@ -122,15 +131,19 @@ public abstract class SciamlabDAO {
 	 * @param query
 	 * @return
 	 */
-	public List<Properties> execQuery(String query){
+	public List<Properties> execQuery(String query, List<Object> params){
 		Connection connection = null;
-		Statement statement = null;
+		PreparedStatement statement = null;
 		ResultSet result = null;
 		try {
 			connection = this.getConnection();
-			statement = connection.createStatement();
-			logger.debug(query);
-			result = statement.executeQuery(query);
+			statement = connection.prepareStatement(query);
+			if (params!=null)
+				for (int i = 1; i <= params.size(); i++) 
+					statement.setObject(i, params.get(i - 1));
+			logger.debug(statement);
+			statement.execute();
+			result = statement.getResultSet();
 			
 			ResultSetMetaData metadata = result.getMetaData();
 			
@@ -164,7 +177,7 @@ public abstract class SciamlabDAO {
 	public List<Properties> execQuery(InputStream is){
 		List<Properties> result = new ArrayList<Properties>();
 		try {
-			result = this.execQuery(SciamlabStreamUtils.convertStreamToString(is).replaceAll("\n", " "));
+			result = this.execQuery(SciamlabStreamUtils.convertStreamToString(is).replaceAll("\n", " "), null);
 		}finally{
 			if(is != null) try { is.close(); } catch (IOException e) { logger.error(e.getMessage(), e);	}
 		}
@@ -174,46 +187,21 @@ public abstract class SciamlabDAO {
 	/**
 	 * Execs a SQL update
 	 * 
-	 * @param stm
+	 * @param update
 	 * @return
 	 */
-	public int execUpdate(String stm){
+	public int execUpdate(String update, List<Object> params){
 		Connection connection = null;
-		Statement statement = null;
+		PreparedStatement statement = null;
 		try {
 			connection = this.getConnection();
-			statement = connection.createStatement();
-			logger.debug(stm);
-			
-			return statement.executeUpdate(stm);
-			
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			throw new DAOException(e);
-		} finally{
-	        if (statement != null) try { statement.close(); } catch (SQLException e) { logger.error(e.getMessage(), e); }
-	        if (connection != null) try { connection.close(); } catch (SQLException e) { logger.error(e.getMessage(), e); }
-		}
-	}
-	
-	/**
-	 * Execs a batch SQL update
-	 * 
-	 * @param stmList
-	 * @return
-	 */
-	public int[] execBatchUpdate(List<String> stmList){
-		Connection connection = null;
-		Statement statement = null;
-		try {
-			connection = this.getConnection();
-			statement = connection.createStatement();
-			for(String stm : stmList){
-				logger.debug(stm);
-				statement.addBatch(stm);
-			}
-			
-			return statement.executeBatch();
+			statement = connection.prepareStatement(update);
+			if (params!=null)
+				for (int i = 1; i <= params.size(); i++) 
+					statement.setObject(i, params.get(i - 1));
+			logger.debug(statement);
+			statement.execute();
+			return statement.getUpdateCount();
 			
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);

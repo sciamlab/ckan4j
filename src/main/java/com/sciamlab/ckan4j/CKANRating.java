@@ -17,6 +17,7 @@ package com.sciamlab.ckan4j;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
@@ -28,7 +29,6 @@ import com.sciamlab.ckan4j.CKANApiClient.CKANApiClientBuilder;
 import com.sciamlab.ckan4j.dao.CKANDAO;
 import com.sciamlab.ckan4j.exception.CKANException;
 import com.sciamlab.ckan4j.exception.InternalServerErrorException;
-import com.sciamlab.ckan4j.util.SciamlabDateUtils;
 
 public class CKANRating {
 	
@@ -78,7 +78,7 @@ public class CKANRating {
 	 * @param rating
 	 * @throws Exception 
 	 */
-	public JSONObject postRate(String dataset_id, String user_id, Integer rating) throws Exception {
+	public JSONObject postRate(final String dataset_id, final String user_id, final Integer rating) throws Exception {
 		if(rating==null || rating > 5 || rating < 1)
 			throw new Exception("Rating must be in [1,2,3,4,5]");
 		if(user_id==null || "".equals(user_id))
@@ -103,26 +103,25 @@ public class CKANRating {
 		JSONObject user = this.ckan.userShow(user_id);
 		
 		//once checked, then register the rating
-		String now_string = SciamlabDateUtils.getCurrentDateAsFormattedString("yyyy-MM-dd hh:mm:ss");
+//		final String now_string = SciamlabDateUtils.getCurrentDateAsFormattedString("yyyy-MM-dd hh:mm:ss");
+		final Date now_string = new Date(new java.util.Date().getTime());
 		//update rating
 		int sql_result = dao.execUpdate("UPDATE " + this.rating_table
-				+ " SET rating='"+rating+"', modified='"+now_string+"'"
-				+ " WHERE user_id='"+user_id+"' AND package_id='"+dataset_id+"';");
+				+ " SET rating = ?, modified = ?"
+				+ " WHERE user_id = ? AND package_id = ?;", new ArrayList<Object>(){{add(rating); add(now_string); add(user_id); add(dataset_id);}});
 		if(sql_result==0){
 			logger.debug("No existing rating found for user '"+user_id+"' on dataset '"+dataset_id+"'. Need to create a new one");
 			//insert new rating
 			sql_result = dao.execUpdate("INSERT INTO " + this.rating_table + " (user_id, package_id, rating, created, modified)"
-					+ " VALUES ('"+user_id+"', '"+dataset_id+"', '"+rating+"', '"+now_string+"', '"+now_string+"');");
+					+ " VALUES (?, ?, ?, ?, ?);", 
+					new ArrayList<Object>(){{add(user_id); add(dataset_id); add(rating); add(now_string); add(now_string);}});
 		}
 		
 		//calculating the new average
 		Map<String, Properties> map = dao.execQuery(
 			"SELECT package_id, count(*) as count, avg(rating) as rating FROM " + this.rating_table
-			+" WHERE package_id = '" + dataset_id + "' GROUP BY package_id", "package_id", 
-			new ArrayList<String>(){{
-	    		add("rating"); add("count");
-	    	}}
-		);
+			+" WHERE package_id = ? GROUP BY package_id", new ArrayList<Object>(){{ add(dataset_id); }}, "package_id", 		
+			new ArrayList<String>(){{ add("rating"); add("count"); }} );
     	for(Properties p: map.values()){
     		rating_average = Double.parseDouble(p.getProperty("rating"));
     		rating_count = Integer.parseInt(p.getProperty("count"));
@@ -135,6 +134,7 @@ public class CKANRating {
     	dataset.put("rating_average_int", average_rating_int);
     	dataset.put("rating_count", rating_count);
     	dataset = this.ckan.packageUpdate(dataset);
+    	logger.info(dataset);
 		logger.info("Rating updated on CKANApiClient: avg "+dataset.get("rating_average")+" count "+dataset.get("rating_count")+" ["+dataset_id+"]");
     	
     	JSONObject json = new JSONObject();

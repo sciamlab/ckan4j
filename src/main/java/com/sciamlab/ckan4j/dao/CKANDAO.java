@@ -16,6 +16,7 @@
 
 package com.sciamlab.ckan4j.dao;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -276,17 +277,19 @@ public abstract class CKANDAO extends SciamlabDAO{
 	 * @return
 	 */
 	public String getOrgId(String orgName) {
-		Connection conn = null;
-		Statement stmt = null;
+		Connection connection = null;
+		PreparedStatement statement = null;
 		ResultSet rs = null;
 
 		String orgId = null;
 
 		try {
-			conn = getConnection();
-			stmt = conn.createStatement();
-			// Execute the query
-			rs = stmt.executeQuery("select id from \"group\" where lower(title) = '"+ orgName.toLowerCase() +"';");
+			connection = getConnection();
+			statement = connection.prepareStatement("select id from \"group\" where lower(title) = ?");
+			statement.setString(1, orgName.toLowerCase());
+			logger.debug(statement);
+			statement.execute();
+			rs = statement.getResultSet();
 
 			// pick the result set
 			if (rs.next())
@@ -298,8 +301,8 @@ public abstract class CKANDAO extends SciamlabDAO{
 			e.printStackTrace();
 		} finally{
 			if(rs!=null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
-			if(stmt!=null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
-			if(conn!=null) try { conn.close(); } catch (SQLException e) { e.printStackTrace();	}
+			if(statement!=null) try { statement.close(); } catch (SQLException e) { e.printStackTrace(); }
+			if(connection!=null) try { connection.close(); } catch (SQLException e) { e.printStackTrace();	}
 		}
 
 		return orgId;
@@ -312,16 +315,19 @@ public abstract class CKANDAO extends SciamlabDAO{
 	 */
 	public  String getOrgLastUpdate(String orgName) {
 		Connection conn = null;
-		Statement stmt = null;
+		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
 		String orgLastUpdate = null;
 
 		try {
 			conn = getConnection();
-			stmt = conn.createStatement();
-			// Execute the query
-			rs = stmt.executeQuery("select to_char(max(revision_timestamp),'DD-MM-YYYY HH24:MI') as last_update from package_revision where owner_org in (select id from \"group\" where name = '"+orgName.toLowerCase()+"');");
+			stmt = conn.prepareStatement("select to_char(max(revision_timestamp),'DD-MM-YYYY HH24:MI') as last_update"
+					+ " from package_revision where owner_org in (select id from \"group\" where name = ?)");
+			stmt.setString(1, orgName.toLowerCase());
+			logger.debug(stmt);
+			stmt.execute();
+			rs = stmt.getResultSet();
 
 			// pick the result set
 			if (rs.next())
@@ -420,9 +426,10 @@ public abstract class CKANDAO extends SciamlabDAO{
 		return this.getUser("name", name);
 	}
 	
-	private User getUser(String col_key, String col_value) {
-		List<Properties> map = this.execQuery("SELECT * FROM \"user\" WHERE "+col_key+"='"+col_value+"'", new ArrayList<String>(){{
-			add("id"); add("name"); add("fullname"); add("email"); add("apikey"); }});
+	private User getUser(String col_key, final String col_value) {
+		List<Properties> map = this.execQuery("SELECT * FROM \"user\" WHERE "+col_key+" = ?", 
+				new ArrayList<Object>(){{ add(col_value); }},
+				new ArrayList<String>(){{ add("id"); add("name"); add("fullname"); add("email"); add("apikey"); }}); 
 		if(map.size()==0) return null;
 		if(map.size()>1) 
 			throw new DAOException("Multiple users retrieved using "+col_key+": "+col_value);
@@ -438,8 +445,9 @@ public abstract class CKANDAO extends SciamlabDAO{
 		return u;
 	}
 	
-	public List<Role> getRolesByUserId(String id) {
-		Map<String, Properties> map = this.execQuery("SELECT DISTINCT role FROM user_object_role WHERE user_id='"+id+"'", "role", new ArrayList<String>());
+	public List<Role> getRolesByUserId(final String id) {
+		Map<String, Properties> map = this.execQuery("SELECT DISTINCT role FROM user_object_role WHERE user_id = ?",
+				new ArrayList<Object>(){{ add(id); }}, "role", new ArrayList<String>());
 		List<Role> roles = new ArrayList<Role>();
 		if(map.size()==0) {
 			roles.add(Role.anonymous);
