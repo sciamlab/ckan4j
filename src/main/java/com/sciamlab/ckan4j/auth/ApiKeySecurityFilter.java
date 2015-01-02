@@ -3,7 +3,6 @@ package com.sciamlab.ckan4j.auth;
 import java.util.List;
 
 import javax.annotation.Priority;
-import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -14,6 +13,7 @@ import org.glassfish.jersey.server.ContainerRequest;
 
 import com.sciamlab.ckan4j.dao.CKANDAO;
 import com.sciamlab.ckan4j.exception.BadRequestException;
+import com.sciamlab.ckan4j.exception.InternalServerErrorException;
 import com.sciamlab.ckan4j.model.User;
 import com.sciamlab.ckan4j.util.SciamlabStringUtils;
 
