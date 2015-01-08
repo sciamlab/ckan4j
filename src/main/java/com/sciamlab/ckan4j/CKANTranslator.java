@@ -16,9 +16,12 @@
 package com.sciamlab.ckan4j;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import com.sciamlab.ckan4j.dao.CKANDAO;
 import com.sciamlab.ckan4j.exception.DAOException;
@@ -70,11 +73,13 @@ public class CKANTranslator {
 	 * @return the result as map indexed by the term in the original language
 	 */
 	public Map<String, Properties> getTerms(
-			String q, String lang_code, boolean translated, boolean not_translated, List<String> package_extra_keys, Integer page_num, Integer page_size){
+			String q_string, String lang_code, boolean translated, boolean not_translated, List<String> package_extra_keys, Integer page_num, Integer page_size){
 		
+		Set<String> qList = new HashSet<String>();
+		qList.addAll(Arrays.asList(q_string.toLowerCase().trim().split(" ")));
 		List<Object> params = new ArrayList<Object>();
 		String selectTableSQL = "SELECT terms_only.term, lang_code, term_translation"
-				+ " FROM ("+generateSQLStatementForTermsList(q.toLowerCase().trim(), package_extra_keys, params)+") terms_only"
+				+ " FROM ("+generateSQLStatementForTermsList(qList, package_extra_keys, params)+") terms_only"
 				+ " LEFT JOIN (SELECT * FROM term_translation WHERE lang_code = '"+lang_code+"') term_translation_filtered"
 				+ " on terms_only.term = term_translation_filtered.term"
 				+ " WHERE 1=1"
@@ -102,11 +107,13 @@ public class CKANTranslator {
 	 * @return the result as map indexed by the term in the original language
 	 */
 	public int getTermsCount(
-			String q, String lang_code, boolean translated, boolean not_translated, List<String> package_extra_keys){
+			String q_string, String lang_code, boolean translated, boolean not_translated, List<String> package_extra_keys){
 		
+		Set<String> qList = new HashSet<String>();
+		qList.addAll(Arrays.asList(q_string.toLowerCase().trim().split(" ")));
 		List<Object> params = new ArrayList<Object>();
 		String selectTableSQL = "SELECT count(terms_only.term) as terms_count"
-				+ " FROM ("+generateSQLStatementForTermsList(q.toLowerCase().trim(), package_extra_keys, params)+") terms_only"
+				+ " FROM ("+generateSQLStatementForTermsList(qList, package_extra_keys, params)+") terms_only"
 				+ " LEFT JOIN (SELECT * FROM term_translation WHERE lang_code='"+lang_code+"') term_translation_filtered"
 				+ " on terms_only.term = term_translation_filtered.term"
 				+ " WHERE 1=1" + getTranslatedCondition(translated, not_translated);
@@ -124,75 +131,165 @@ public class CKANTranslator {
 	 * @param package_extra_keys
 	 * @return the SQL statement as String
 	 */
-	private String generateSQLStatementForTermsList(String q, List<String> package_extra_keys, List<Object> params){
+	private String generateSQLStatementForTermsList(Set<String> qList, List<String> package_extra_keys, List<Object> params){
 		String related1 = "SELECT DISTINCT title AS term FROM related"
 				+ " WHERE title IS NOT NULL AND title <> ''";
-		if(q!=null && !"".equals(q)){
-			related1 += " AND lower(title) like ?";
-			params.add("%"+q+"%");
+		if(qList!=null && !qList.isEmpty()){
+			related1 += " AND (";
+			boolean first = true;
+			for(String q : qList){
+				if(first)
+					first = false;
+				else
+					related1 += " OR ";
+				related1 += "lower(title) like ?";
+				params.add("%"+q+"%");
+			}
+			related1 += ")";
 		}
-		
+
 		String related2 = "SELECT DISTINCT description AS term FROM related"
 				+ " WHERE description IS NOT NULL AND description <> ''";
-		if(q!=null && !"".equals(q)){
-			related2 += " AND lower(description) like ?";
-			params.add("%"+q+"%");
+		if(qList!=null && !qList.isEmpty()){
+			related2 += " AND (";
+			boolean first = true;
+			for(String q : qList){
+				if(first)
+					first = false;
+				else
+					related2 += " OR ";
+				related2 += "lower(description) like ?";
+				params.add("%"+q+"%");
+			}
+			related2 += ")";
 		}
 		
 		String groups1 = "SELECT DISTINCT title AS term FROM \"group\""
 				+ " WHERE title IS NOT NULL AND title <> ''";
-		if(q!=null && !"".equals(q)){
-			groups1 += " AND lower(title) like ?";
-			params.add("%"+q+"%");
+		if(qList!=null && !qList.isEmpty()){
+			groups1 += " AND (";
+			boolean first = true;
+			for(String q : qList){
+				if(first)
+					first = false;
+				else
+					groups1 += " OR ";
+				groups1 += "lower(title) like ?";
+				params.add("%"+q+"%");
+			}
+			groups1 += ")";
 		}
 		
 		String groups2 = "SELECT DISTINCT description AS term FROM \"group\""
 				+ " WHERE description IS NOT NULL AND description <> ''";
-		if(q!=null && !"".equals(q)){
-			groups2 += " AND lower(description) like ?";
-			params.add("%"+q+"%");
+		if(qList!=null && !qList.isEmpty()){
+			groups2 += " AND (";
+			boolean first = true;
+			for(String q : qList){
+				if(first)
+					first = false;
+				else
+					groups2 += " OR ";
+				groups2 += "lower(description) like ?";
+				params.add("%"+q+"%");
+			}
+			groups2 += ")";
 		}
 		
 		String tags = "SELECT DISTINCT name AS term FROM tag"
 				+ " WHERE name IS NOT NULL AND name <> ''";
-		if(q!=null && !"".equals(q)){
-			tags += " AND lower(name) like ?";
-			params.add("%"+q+"%");
+		if(qList!=null && !qList.isEmpty()){
+			tags += " AND (";
+			boolean first = true;
+			for(String q : qList){
+				if(first)
+					first = false;
+				else
+					tags += " OR ";
+				tags += "lower(name) like ?";
+				params.add("%"+q+"%");
+			}
+			tags += ")";
 		}
 		
 		String resources = "SELECT DISTINCT description AS term FROM resource"
 				+ " WHERE description IS NOT NULL AND description <> ''";
-		if(q!=null && !"".equals(q)){
-			resources += " AND lower(description) like ?";
-			params.add("%"+q+"%");
+		if(qList!=null && !qList.isEmpty()){
+			resources += " AND (";
+			boolean first = true;
+			for(String q : qList){
+				if(first)
+					first = false;
+				else
+					resources += " OR ";
+				resources += "lower(description) like ?";
+				params.add("%"+q+"%");
+			}
+			resources += ")";
 		}
 		
 		String resources2 = "SELECT DISTINCT name AS term FROM resource"
 				+ " WHERE name IS NOT NULL AND name <> ''";
-		if(q!=null && !"".equals(q)){
-			resources2 += " AND lower(name) like ?";
-			params.add("%"+q+"%");
+		if(qList!=null && !qList.isEmpty()){
+			resources2 += " AND (";
+			boolean first = true;
+			for(String q : qList){
+				if(first)
+					first = false;
+				else
+					resources2 += " OR ";
+				resources2 += "lower(name) like ?";
+				params.add("%"+q+"%");
+			}
+			resources2 += ")";
 		}
 		
 		String packages2 = "SELECT DISTINCT title AS term FROM package"
 				+ " WHERE title IS NOT NULL AND title <> ''";
-		if(q!=null && !"".equals(q)){
-			packages2 += " AND lower(title) like ?";
-			params.add("%"+q+"%");
+		if(qList!=null && !qList.isEmpty()){
+			packages2 += " AND (";
+			boolean first = true;
+			for(String q : qList){
+				if(first)
+					first = false;
+				else
+					packages2 += " OR ";
+				packages2 += "lower(title) like ?";
+				params.add("%"+q+"%");
+			}
+			packages2 += ")";
 		}
 		
 		String packages3 = "SELECT DISTINCT notes AS term FROM package"
 				+ " WHERE notes IS NOT NULL AND notes <> ''";
-		if(q!=null && !"".equals(q)){
-			packages3 += " AND lower(notes) like ?";
-			params.add("%"+q+"%");
+		if(qList!=null && !qList.isEmpty()){
+			packages3 += " AND (";
+			boolean first = true;
+			for(String q : qList){
+				if(first)
+					first = false;
+				else
+					packages3 += " OR ";
+				packages3 += "lower(notes) like ?";
+				params.add("%"+q+"%");
+			}
+			packages3 += ")";
 		}
 		
 		String package_extras = "SELECT DISTINCT value AS term FROM package_extra"
 				+ " WHERE value IS NOT NULL AND value <> ''";
-		if(q!=null && !"".equals(q)){
-			package_extras += " AND lower(value) like ?";
-			params.add("%"+q+"%");
+		if(qList!=null && !qList.isEmpty()){
+			package_extras += " AND (";
+			boolean first = true;
+			for(String q : qList){
+				if(first)
+					first = false;
+				else
+					package_extras += " OR ";
+				package_extras += "lower(value) like ?";
+				params.add("%"+q+"%");
+			}
+			package_extras += ")";
 		}
 				
 		if(package_extra_keys!=null && !package_extra_keys.isEmpty()){

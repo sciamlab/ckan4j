@@ -84,23 +84,23 @@ public class CKANRating {
 		if(user_id==null || "".equals(user_id))
 			throw new Exception("User is mandatory");
 		
-		//getting dataset info
-		JSONObject dataset = this.ckan.packageShow(dataset_id);
+//		//getting dataset info
+//		JSONObject dataset = this.ckan.packageShow(dataset_id);
+//		
+//		Integer rating_count = dataset.opt("rating_count")!=null && !"None".equals(dataset.getString("rating_count")) ? dataset.getInt("rating_count") : new Integer(0);
+//		Double rating_average = dataset.opt("rating_average")!=null && !"None".equals(dataset.getString("rating_average")) ? dataset.getDouble("rating_average") : new Double(0.0);
+//		logger.debug("current count: "+rating_count+" average: "+rating_average);
 		
-		Integer rating_count = dataset.opt("rating_count")!=null && !"None".equals(dataset.getString("rating_count")) ? dataset.getInt("rating_count") : new Integer(0);
-		Double rating_average = dataset.opt("rating_average")!=null && !"None".equals(dataset.getString("rating_average")) ? dataset.getDouble("rating_average") : new Double(0.0);
-		logger.debug("current count: "+rating_count+" average: "+rating_average);
-		
-		//converting spatial into string to avoid parsing issue during update
-		if(dataset.opt("spatial")!=null && !"".equals(dataset.getString("spatial"))){
-			JSONObject spatial = new JSONObject(dataset.getString("spatial"));
-			if(spatial.opt("type")!=null && spatial.opt("coordinates")!=null);{
-				dataset.put("spatial", "{ \"type\": \""+spatial.getString("type")+"\", \"coordinates\": "+ spatial.getJSONArray("coordinates") +" }");
-			}
-		}
+//		//converting spatial into string to avoid parsing issue during update
+//		if(dataset.opt("spatial")!=null && !"".equals(dataset.getString("spatial"))){
+//			JSONObject spatial = new JSONObject(dataset.getString("spatial"));
+//			if(spatial.opt("type")!=null && spatial.opt("coordinates")!=null);{
+//				dataset.put("spatial", "{ \"type\": \""+spatial.getString("type")+"\", \"coordinates\": "+ spatial.getJSONArray("coordinates") +" }");
+//			}
+//		}
 			
 		//getting user info
-		JSONObject user = this.ckan.userShow(user_id);
+//		JSONObject user = this.ckan.userShow(user_id);
 		
 		//once checked, then register the rating
 //		final String now_string = SciamlabDateUtils.getCurrentDateAsFormattedString("yyyy-MM-dd hh:mm:ss");
@@ -122,11 +122,19 @@ public class CKANRating {
 			"SELECT package_id, count(*) as count, avg(rating) as rating FROM " + this.rating_table
 			+" WHERE package_id = ? GROUP BY package_id", new ArrayList<Object>(){{ add(dataset_id); }}, "package_id", 		
 			new ArrayList<String>(){{ add("rating"); add("count"); }} );
-    	for(Properties p: map.values()){
-    		rating_average = Double.parseDouble(p.getProperty("rating"));
-    		rating_count = Integer.parseInt(p.getProperty("count"));
-    		break;
-    	}
+    	Properties p = map.get(dataset_id);
+    	Double rating_average = Double.parseDouble(p.getProperty("rating"));
+    	Integer rating_count = Integer.parseInt(p.getProperty("count"));
+    	
+    	//getting dataset info
+		JSONObject dataset = this.ckan.packageShow(dataset_id);
+		//converting spatial into string to avoid parsing issue during update
+		if(dataset.opt("spatial")!=null && !"".equals(dataset.getString("spatial"))){
+			JSONObject spatial = new JSONObject(dataset.getString("spatial"));
+			if(spatial.opt("type")!=null && spatial.opt("coordinates")!=null);{
+				dataset.put("spatial", "{ \"type\": \""+spatial.getString("type")+"\", \"coordinates\": "+ spatial.getJSONArray("coordinates") +" }");
+			}
+		}
     	
 		//updating rating on CKANApiClient
     	dataset.put("rating_average", rating_average);
@@ -134,7 +142,7 @@ public class CKANRating {
     	dataset.put("rating_average_int", average_rating_int);
     	dataset.put("rating_count", rating_count);
     	dataset = this.ckan.packageUpdate(dataset);
-    	logger.info(dataset);
+    	logger.debug(dataset);
 		logger.info("Rating updated on CKANApiClient: avg "+dataset.get("rating_average")+" count "+dataset.get("rating_count")+" ["+dataset_id+"]");
     	
     	JSONObject json = new JSONObject();
