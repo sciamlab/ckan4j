@@ -59,11 +59,11 @@ public abstract class CKANDAO extends SciamlabDAO{
 			conn = getConnection();
 			stmt = conn.createStatement();
 			// Execute the query
-			rs = stmt.executeQuery("select lower(value) as category, count(*) as count from package_extra where key='category' group by value; ");
+			rs = stmt.executeQuery("select value as category_id, count(*) as count from package_extra where key='category_id' group by value; ");
 
 			// Loop through the result set
 			while (rs.next())
-				map.put(rs.getString("category"),rs.getInt("count"));
+				map.put(rs.getString("category_id"),rs.getInt("count"));
 
 			// Close the result set, statement and the connection
 
