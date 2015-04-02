@@ -59,6 +59,8 @@ public class CKANApiClient {
 	private static final String USER_SHOW = "user_show";
 	
 	private static final String PACKAGE_UPDATE = "package_update";
+	private static final String PACKAGE_CREATE = "package_create";
+	private static final String PACKAGE_DELETE = "package_delete";
 
 	private CKANApiClient(CKANApiClientBuilder builder) {
 		this.ckan_api_key = builder.ckan_api_key;
@@ -86,15 +88,26 @@ public class CKANApiClient {
 		try {
 			result = new JSONObject(result_string);
 		} catch (JSONException e) {
-			throw new CKANException(e);
+			throw new CKANException(e, result_string);
 		}
 		if(!result.getBoolean("success"))
 			throw new CKANException(result.getJSONObject("error"));
 		return result.get("result");
 	}
 	
+	public boolean packageDelete(final String name) throws CKANException{
+		JSONObject json = new JSONObject();
+		json.put("id", name);
+		Object result = actionPOST(PACKAGE_DELETE, json);
+		return true;
+	}
+	
 	public JSONObject packageUpdate(final JSONObject dataset) throws CKANException{
 		return (JSONObject) actionPOST(PACKAGE_UPDATE, dataset);
+	}
+	
+	public JSONObject packageCreate(final JSONObject dataset) throws CKANException{
+		return (JSONObject) actionPOST(PACKAGE_CREATE, dataset);
 	}
 	
 	/*
@@ -126,8 +139,12 @@ public class CKANApiClient {
 	public JSONArray packageList(final Integer limit, final Integer offset) throws CKANException{
 		return (JSONArray) actionGET(PACKAGE_LIST, new MultivaluedHashMap<String, String>(){{ 
 				if(limit!=null )put("limit", new ArrayList<String>(){{ add(limit.toString()); }});
-				if(offset!=null )put("limit", new ArrayList<String>(){{ add(offset.toString()); }});
+				if(offset!=null )put("offset", new ArrayList<String>(){{ add(offset.toString()); }});
 			}});
+	}
+	
+	public JSONArray packageList() throws CKANException{
+		return packageList(null, null);
 	}
 	
 	public JSONArray groupList() throws CKANException{

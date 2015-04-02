@@ -36,10 +36,18 @@ public class CKANException extends Exception {
 	}
 	
 	public CKANException(JSONException e){
-		super("JSONException");
+		super(e);
 		this.error = new JSONObject();
 		this.error.put("__type", "JSONException");
 		this.error.put("message", e.getMessage());
+	}
+	
+	public CKANException(JSONException e, String text){
+		super(e);
+		this.error = new JSONObject();
+		this.error.put("__type", "JSONException");
+		this.error.put("message", e.getMessage());
+		this.error.put("text", text);
 	}
 
 	public JSONObject getError() {

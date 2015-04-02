@@ -59,7 +59,9 @@ public abstract class CKANDAO extends SciamlabDAO{
 			conn = getConnection();
 			stmt = conn.createStatement();
 			// Execute the query
-			rs = stmt.executeQuery("select value as category_id, count(*) as count from package_extra where key='category_id' group by value; ");
+			rs = stmt.executeQuery("select pe.value as category_id, count(*) as count"
+					+ " from package_extra as pe join package as p on pe.package_id=p.id"
+					+ " where pe.key='category_id' and p.private=false and p.state='active' group by pe.value;");
 
 			// Loop through the result set
 			while (rs.next())
