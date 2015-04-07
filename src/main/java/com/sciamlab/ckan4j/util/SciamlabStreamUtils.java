@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Scanner;
 
 import javax.ws.rs.WebApplicationException;
@@ -118,5 +119,11 @@ public class SciamlabStreamUtils {
 	public static String convertStreamToString(InputStream is) {
 	    Scanner s = new Scanner(is).useDelimiter("\\A");
 	    return s.hasNext() ? s.next() : "";
+	}
+	
+	public static InputStream getRemoteInputStream(String uri) throws Exception{
+		URL url = new URL(uri);
+        URLConnection urlConn = url.openConnection();
+        return urlConn.getInputStream();
 	}
 }
