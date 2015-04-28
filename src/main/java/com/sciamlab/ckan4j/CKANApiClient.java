@@ -28,7 +28,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.sciamlab.ckan4j.exception.CKANException;
-import com.sciamlab.ckan4j.util.HTTPClient;
+import com.sciamlab.common.util.HTTPClient;
 
 
 /**

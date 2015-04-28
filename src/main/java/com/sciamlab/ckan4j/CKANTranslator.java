@@ -24,7 +24,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import com.sciamlab.ckan4j.dao.CKANDAO;
-import com.sciamlab.ckan4j.exception.DAOException;
+import com.sciamlab.common.exception.DAOException;
 
 public class CKANTranslator {
 	

@@ -20,7 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -28,13 +27,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import com.sciamlab.ckan4j.exception.DAOException;
-import com.sciamlab.ckan4j.model.Role;
-import com.sciamlab.ckan4j.model.User;
+import com.sciamlab.auth.dao.SciamlabAuthDAO;
+import com.sciamlab.common.dao.SciamlabDAO;
 
 /**
  * 
@@ -44,7 +41,7 @@ import com.sciamlab.ckan4j.model.User;
 
 public abstract class CKANDAO extends SciamlabDAO{
 	
-	private static final Logger logger = Logger.getLogger(CKANDAO.class);
+	private static final Logger logger = Logger.getLogger(SciamlabAuthDAO.class);
 
 	/**
 	 * 
@@ -419,56 +416,5 @@ public abstract class CKANDAO extends SciamlabDAO{
 
 		return map;
 	}
-	
-	public User getUserByApiKey(String apikey) {
-		return this.getUser("apikey", apikey);
-	}
-	
-	public User getUserByName(String name) {
-		return this.getUser("name", name);
-	}
-	
-	private User getUser(String col_key, final String col_value) {
-		List<Properties> map = this.execQuery("SELECT * FROM \"user\" WHERE "+col_key+" = ?", 
-				new ArrayList<Object>(){{ add(col_value); }},
-				new ArrayList<String>(){{ add("id"); add("name"); add("fullname"); add("email"); add("apikey"); }}); 
-		if(map.size()==0) return null;
-		if(map.size()>1) 
-			throw new DAOException("Multiple users retrieved using "+col_key+": "+col_value);
-		Properties p = map.get(0);
-		User u = new User();
-		u.setFirstName(p.getProperty("fullname"));
-		u.setUsername(p.getProperty("name"));
-		u.setEmailAddress(p.getProperty("email"));
-		u.setApiKey(p.getProperty("apikey"));
-		u.setId(p.getProperty("id"));
-		u.getRoles().clear();
-		u.getRoles().addAll(this.getRolesByUserId(p.getProperty("id")));
-		return u;
-	}
-	
-	public List<Role> getRolesByUserId(final String id) {
-		Map<String, Properties> map = this.execQuery("SELECT DISTINCT role FROM user_object_role WHERE user_id = ?",
-				new ArrayList<Object>(){{ add(id); }}, "role", new ArrayList<String>());
-		List<Role> roles = new ArrayList<Role>();
-		if(map.size()==0) {
-			roles.add(Role.anonymous);
-			return roles;
-		}
-		
-		for(String r : map.keySet()){
-			Role role = Role.valueOf(r);
-			if(role!=null){
-				roles.add(role);
-				logger.debug("Role added: "+r);
-			}else{
-				logger.warn(r+"is not identified as a valid role!");
-			}
-		}
-		if(roles.isEmpty())
-			roles.add(Role.anonymous);
-		return roles;
-	}
-
 	
 }

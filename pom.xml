@@ -4,7 +4,7 @@
 
 	<groupId>sciamlab</groupId>
 	<artifactId>ckan4j</artifactId>
-	<version>1.0.2-SNAPSHOT</version>
+	<version>2.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>ckan4j</name>
@@ -74,6 +74,16 @@
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>sciamlab</groupId>
+			<artifactId>common-lib</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>sciamlab</groupId>
+			<artifactId>auth-lib</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
 		
