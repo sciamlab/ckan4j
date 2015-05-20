@@ -18,6 +18,7 @@ package com.sciamlab.ckan4j;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -54,13 +55,17 @@ public class CKANApiClient {
 	private static final String PACKAGE_SHOW = "package_show";
 	private static final String RESOURCE_SHOW = "resource_show";
 	private static final String GROUP_SHOW = "group_show";
-	private static final String ORGANIZAION_SHOW = "organization_show";
+	private static final String ORGANIZATION_SHOW = "organization_show";
 	private static final String TAG_SHOW = "tag_show";
 	private static final String USER_SHOW = "user_show";
 	
 	private static final String PACKAGE_UPDATE = "package_update";
 	private static final String PACKAGE_CREATE = "package_create";
 	private static final String PACKAGE_DELETE = "package_delete";
+	
+	private static final String ORGANIZATION_PATCH = "organization_patch";
+	private static final String ORGANIZATION_CREATE = "organization_create";
+	private static final String ORGANIZATION_DELETE = "organization_delete";
 
 	private CKANApiClient(CKANApiClientBuilder builder) {
 		this.ckan_api_key = builder.ckan_api_key;
@@ -108,6 +113,35 @@ public class CKANApiClient {
 	
 	public JSONObject packageCreate(final JSONObject dataset) throws CKANException{
 		return (JSONObject) actionPOST(PACKAGE_CREATE, dataset);
+	}
+	
+	public boolean organizationDelete(final String name) throws CKANException{
+		JSONObject json = new JSONObject();
+		json.put("id", name);
+		Object result = actionPOST(ORGANIZATION_DELETE, json);
+		return true;
+	}
+	
+	/**
+	 * name (string) – the name of the organization, a string between 2 and 100 characters long, containing only lowercase alphanumeric characters, - and _
+	 * title (string) – the title of the organization (optional)
+	 * description (string) – the description of the organization (optional)
+	 * image_url (string) – the URL to an image to be displayed on the organization’s page (optional)
+	 * extras (list of dataset extra dictionaries) – the org
+	 */
+	public JSONObject organizationPatch(final JSONObject organization) throws CKANException{
+		return (JSONObject) actionPOST(ORGANIZATION_PATCH, organization);
+	}
+	
+	/**
+	 * name (string) – the name of the organization, a string between 2 and 100 characters long, containing only lowercase alphanumeric characters, - and _
+	 * title (string) – the title of the organization (optional)
+	 * description (string) – the description of the organization (optional)
+	 * image_url (string) – the URL to an image to be displayed on the organization’s page (optional)
+	 * extras (list of dataset extra dictionaries) – the org
+	 */
+	public JSONObject organizationCreate(final JSONObject organization) throws CKANException{
+		return (JSONObject) actionPOST(ORGANIZATION_CREATE, organization);
 	}
 	
 	/*
@@ -182,7 +216,7 @@ public class CKANApiClient {
 	}
 	
 	public JSONObject organizationShow(final String id, final Boolean include_dataset) throws CKANException{
-		return (JSONObject) actionGET(ORGANIZAION_SHOW, new MultivaluedHashMap<String, String>(){{ 
+		return (JSONObject) actionGET(ORGANIZATION_SHOW, new MultivaluedHashMap<String, String>(){{ 
 				put("id", new ArrayList<String>(){{ add(id); }}); 
 				if(include_dataset!=null && include_dataset)
 					put("include_datasets", new ArrayList<String>(){{ add("True"); }});
