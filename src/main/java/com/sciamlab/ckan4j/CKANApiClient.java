@@ -63,7 +63,7 @@ public class CKANApiClient {
 	private static final String PACKAGE_CREATE = "package_create";
 	private static final String PACKAGE_DELETE = "package_delete";
 	
-	private static final String ORGANIZATION_PATCH = "organization_patch";
+	private static final String ORGANIZATION_UPDATE = "organization_update";
 	private static final String ORGANIZATION_CREATE = "organization_create";
 	private static final String ORGANIZATION_DELETE = "organization_delete";
 
@@ -79,6 +79,7 @@ public class CKANApiClient {
 	
 	private Object actionPOST(String action, JSONObject body) throws CKANException{
 		String result_string = "";
+//		System.out.println(body);
 		try {
 			result_string = this.http.doPOST(new URL(ckan_api_endpoint + "/action/" + action), 
 					body.toString(), MediaType.APPLICATION_JSON_TYPE, null, 
@@ -89,14 +90,17 @@ public class CKANApiClient {
 		} catch (MalformedURLException e) {
 			logger.error(e.getMessage(), e);
 		}
-		JSONObject result;
+		JSONObject result = null;
 		try {
 			result = new JSONObject(result_string);
 		} catch (JSONException e) {
+			logger.error(result, e);
 			throw new CKANException(e, result_string);
 		}
-		if(!result.getBoolean("success"))
+		if(!result.has("success") || !result.getBoolean("success")){
+//			System.out.println(result);
 			throw new CKANException(result.getJSONObject("error"));
+		}
 		return result.get("result");
 	}
 	
@@ -129,8 +133,8 @@ public class CKANApiClient {
 	 * image_url (string) – the URL to an image to be displayed on the organization’s page (optional)
 	 * extras (list of dataset extra dictionaries) – the org
 	 */
-	public JSONObject organizationPatch(final JSONObject organization) throws CKANException{
-		return (JSONObject) actionPOST(ORGANIZATION_PATCH, organization);
+	public JSONObject organizationUpdate(final JSONObject organization) throws CKANException{
+		return (JSONObject) actionPOST(ORGANIZATION_UPDATE, organization);
 	}
 	
 	/**
@@ -165,8 +169,10 @@ public class CKANApiClient {
 		} catch (JSONException e) {
 			throw new CKANException(e);
 		}
-		if(!result.getBoolean("success"))
+		if(!result.has("success") || !result.getBoolean("success")){
+//			System.out.println(result);
 			throw new CKANException(result.getJSONObject("error"));
+		}
 		return result.get("result");
 	}
 	
