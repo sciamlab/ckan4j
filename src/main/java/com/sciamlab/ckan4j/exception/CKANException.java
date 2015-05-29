@@ -31,7 +31,7 @@ public class CKANException extends Exception {
 	private JSONObject error;
 
 	public CKANException(JSONObject error){
-		super((error.opt("__type")!=null)?error.getString("__type"):error.toString());
+		super((error.has("__type"))?(error.getString("__type")+": "+error.optString("message")):error.toString());
 		this.error = error;
 	}
 	
