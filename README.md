@@ -1,6 +1,7 @@
 ckan4j
 ======
 A java library to extend and access core functionalities of CKAN.
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/sciamlab/ckan4j/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
 Why a CKAN java library
 -----------------------
