@@ -30,7 +30,6 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.sciamlab.auth.dao.SciamlabAuthDAO;
 import com.sciamlab.common.dao.SciamlabDAO;
 
 /**
@@ -41,7 +40,7 @@ import com.sciamlab.common.dao.SciamlabDAO;
 
 public abstract class CKANDAO extends SciamlabDAO{
 	
-	private static final Logger logger = Logger.getLogger(SciamlabAuthDAO.class);
+	private static final Logger logger = Logger.getLogger(CKANDAO.class);
 
 	/**
 	 * 

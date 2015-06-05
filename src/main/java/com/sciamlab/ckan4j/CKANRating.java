@@ -25,8 +25,8 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
-import com.sciamlab.auth.dao.SciamlabAuthDAO;
 import com.sciamlab.ckan4j.CKANApiClient.CKANApiClientBuilder;
+import com.sciamlab.ckan4j.dao.CKANDAO;
 import com.sciamlab.ckan4j.exception.CKANException;
 import com.sciamlab.common.exception.InternalServerErrorException;
 
@@ -34,7 +34,7 @@ public class CKANRating {
 	
 	private static final Logger logger = Logger.getLogger(CKANRating.class);
 	
-	private SciamlabAuthDAO dao;
+	private CKANDAO dao;
 	private CKANApiClient ckan;
 	private String rating_table;
 	
@@ -164,16 +164,16 @@ public class CKANRating {
 	
 	public static class CKANRatingBuilder{
 		
-		private final SciamlabAuthDAO dao;
+		private final CKANDAO dao;
 		private final URL ckan_api_endpoint;
 		private final String rating_table;
 		private final String ckan_api_key;
 		
-		public static CKANRatingBuilder getInstance(SciamlabAuthDAO dao, String ckan_api_endpoint, String api_key, String rating_table) throws MalformedURLException{
+		public static CKANRatingBuilder getInstance(CKANDAO dao, String ckan_api_endpoint, String api_key, String rating_table) throws MalformedURLException{
 			return new CKANRatingBuilder(dao, ckan_api_endpoint, api_key, rating_table);
 		}
 		
-		private CKANRatingBuilder(SciamlabAuthDAO dao, String ckan_api_endpoint, String api_key, String rating_table) throws MalformedURLException {
+		private CKANRatingBuilder(CKANDAO dao, String ckan_api_endpoint, String api_key, String rating_table) throws MalformedURLException {
 			super();
 			this.ckan_api_endpoint = new URL(ckan_api_endpoint);
 			this.dao = dao;
