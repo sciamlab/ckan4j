@@ -42,6 +42,12 @@ ckan4j is distributed as an [Eclipse](https://www.eclipse.org/) based [Maven](ht
 Once you build it, you can use it in webapps or generic Java client apps adding the jar to the classpath (it is not yet published on a Maven repo).
 If you are interested on a reference implementation for a web api, you can give a look to [ckan4j-webapi](https://github.com/sciamlab/ckan4j-webapi).
 
+
+Dependencies
+-------------
+ckan4j require the SciamLab [common-lib](https://github.com/sciamlab/common-lib)
+
+
 Contribute
 ----------
 SciamLab is maintaining the library but we are happy to consider your feedbacks

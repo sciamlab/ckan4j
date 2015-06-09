@@ -23,12 +23,16 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import com.sciamlab.ckan4j.dao.CKANDAO;
+import org.apache.log4j.Logger;
+
+import com.sciamlab.common.dao.SciamlabDAO;
 import com.sciamlab.common.exception.DAOException;
 
 public class CKANTranslator {
 	
-	private CKANDAO dao;
+	private static final Logger logger = Logger.getLogger(CKANTranslator.class);
+	
+	private SciamlabDAO dao;
 	
 	private CKANTranslator(CKANTranslatorBuilder builder) {
 		this.dao = builder.dao;
@@ -120,7 +124,7 @@ public class CKANTranslator {
 		
 		// execs the select SQL statement
 		List<Properties> result = dao.execQuery(selectTableSQL, params, new ArrayList<String>(){{ add("terms_count"); }});
-		int count = Integer.parseInt(result.get(0).getProperty("terms_count"));
+		int count = Integer.parseInt(result.get(0).get("terms_count").toString());
 		return count;
 	}
 	
@@ -332,13 +336,13 @@ public class CKANTranslator {
 	
 	public static class CKANTranslatorBuilder{
 		
-		private final CKANDAO dao;
+		private final SciamlabDAO dao;
 		
-		public static CKANTranslatorBuilder getInstance(CKANDAO dao){
+		public static CKANTranslatorBuilder getInstance(SciamlabDAO dao){
 			return new CKANTranslatorBuilder(dao);
 		}
 		
-		private CKANTranslatorBuilder(CKANDAO dao) {
+		private CKANTranslatorBuilder(SciamlabDAO dao) {
 			super();
 			this.dao = dao;
 		}
