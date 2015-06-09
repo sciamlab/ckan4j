@@ -25,4 +25,6 @@ public class CKAN {
 	public static final String OWNER_ORG = "owner_org";
 	public static final String STATE = "state";
 	public static final String IMAGE_URL = "image_url";
+	public static final String KEY = "key";
+	public static final String VALUE = "value";
 }
