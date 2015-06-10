@@ -27,4 +27,6 @@ public class CKAN {
 	public static final String IMAGE_URL = "image_url";
 	public static final String KEY = "key";
 	public static final String VALUE = "value";
+	public static final String CKAN_URL = "ckan_url";
+	public static final String DOWNLOAD_URL = "download_url";
 }
