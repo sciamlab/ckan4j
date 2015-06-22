@@ -14,6 +14,7 @@ public class CKAN {
 	public static final String MAINTAINER_EMAIL = "maintainer_email";
 	public static final String NOTES = "notes";
 	public static final String METADATA_CREATED = "metadata_created";
+	public static final String LICENSE = "license";
 	public static final String LICENSE_ID = "license_id";
 	public static final String LICENSE_URL = "license_url";
 	public static final String LICENSE_NAME = "license_name";
