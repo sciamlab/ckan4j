@@ -94,7 +94,7 @@ public class CKANApiClient {
 		try {
 			result = new JSONObject(result_string);
 		} catch (JSONException e) {
-			logger.error(result, e);
+			logger.error(result_string, e);
 			throw new CKANException(e, result_string);
 		}
 		if(!result.has("success") || !result.getBoolean("success")){
@@ -167,6 +167,7 @@ public class CKANApiClient {
 		try {
 			result = new JSONObject(result_string);
 		} catch (JSONException e) {
+			logger.error(result_string, e);
 			throw new CKANException(e);
 		}
 		if(!result.has("success") || !result.getBoolean("success")){
