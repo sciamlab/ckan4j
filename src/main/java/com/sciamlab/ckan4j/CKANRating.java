@@ -123,8 +123,8 @@ public class CKANRating {
 			+" WHERE package_id = ? GROUP BY package_id", new ArrayList<Object>(){{ add(dataset_id); }}, "package_id", 		
 			new ArrayList<String>(){{ add("rating"); add("count"); }} );
     	Properties p = map.get(dataset_id);
-    	Double rating_average = Double.parseDouble(p.getProperty("rating"));
-    	Integer rating_count = Integer.parseInt(p.getProperty("count"));
+    	Double rating_average = (Double) p.get("rating");
+    	Integer rating_count = (Integer) p.get("count");
     	
     	//getting dataset info
 		JSONObject dataset = this.ckan.packageShow(dataset_id);
