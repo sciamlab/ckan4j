@@ -125,7 +125,7 @@ public class CKANRating {
 			new ArrayList<String>(){{ add("rating"); add("count"); }} );
     	Properties p = map.get(dataset_id);
     	Double rating_average = ((BigDecimal) p.get("rating")).doubleValue();
-    	Integer rating_count = (Integer) p.get("count");
+    	Integer rating_count = ((Long) p.get("count")).intValue();
     	
     	//getting dataset info
 		JSONObject dataset = this.ckan.packageShow(dataset_id);
