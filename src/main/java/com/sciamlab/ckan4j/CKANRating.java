@@ -144,7 +144,7 @@ public class CKANRating {
     	dataset.put("rating_count", rating_count);
     	dataset = this.ckan.packageUpdate(dataset);
     	logger.debug(dataset);
-		logger.info("Rating updated on CKANApiClient: avg "+dataset.get("rating_average")+" count "+dataset.get("rating_count")+" ["+dataset_id+"]");
+		logger.info("Rating updated on CKANApiClient: avg "+dataset.getDouble("rating_average")+" count "+dataset.getInt("rating_count")+" ["+dataset_id+"]");
     	
     	JSONObject json = new JSONObject();
     	json.put("dataset", dataset_id);
