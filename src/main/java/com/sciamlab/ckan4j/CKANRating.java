@@ -15,6 +15,7 @@
  */
 package com.sciamlab.ckan4j;
 
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Date;
@@ -123,7 +124,7 @@ public class CKANRating {
 			+" WHERE package_id = ? GROUP BY package_id", new ArrayList<Object>(){{ add(dataset_id); }}, "package_id", 		
 			new ArrayList<String>(){{ add("rating"); add("count"); }} );
     	Properties p = map.get(dataset_id);
-    	Double rating_average = (Double) p.get("rating");
+    	Double rating_average = ((BigDecimal) p.get("rating")).doubleValue();
     	Integer rating_count = (Integer) p.get("count");
     	
     	//getting dataset info
