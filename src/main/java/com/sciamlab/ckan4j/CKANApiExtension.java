@@ -100,7 +100,7 @@ public class CKANApiExtension {
 			String theme = p.getProperty("eurovoc_theme");
 			if (!theme.equals(previousTheme)) 
 				eurovocMicrotheme = new LinkedHashMap<String, Integer>();
-			eurovocMicrotheme.put(p.getProperty("eurovoc_microtheme"), ((Long)p.get("microtheme_count")).intValue());
+			eurovocMicrotheme.put(p.getProperty("eurovoc_microtheme"), ((Long)p.get("c")).intValue());
 			map.put(theme, eurovocMicrotheme);
 			previousTheme = theme;
 		}
