@@ -93,11 +93,7 @@ public class CKANApiExtension {
 		
 		Map <String,Map<String,Integer>> map = new HashMap<String,Map<String,Integer>>();
 		
-		List<Properties> res = dao.execQuery( "select replace(eurovoc_theme,'\"','') as eurovoc_theme, " +
-					"   replace(eurovoc_microtheme,'\"','') as eurovoc_microtheme,  " +
-					"   count(eurovoc_microtheme) as microtheme_count " +
-					"from eurovoc_view group by eurovoc_theme,eurovoc_microtheme "+ 
-					"order by eurovoc_theme,eurovoc_microtheme");
+		List<Properties> res = dao.execQuery( "select * from eurovoc_view;");
 		Map <String,Integer> eurovocMicrotheme = new LinkedHashMap<String, Integer>();
 		String previousTheme="";
 		for(Properties p : res){
@@ -110,7 +106,6 @@ public class CKANApiExtension {
 		}
 		return map;	
 	}
-	
 	
 	/**
 	 * Returns the id of the organization with the given name
