@@ -95,14 +95,11 @@ public class CKANApiExtension {
 		
 		List<Properties> res = dao.execQuery( "select * from eurovoc_view;");
 		Map <String,Integer> eurovocMicrotheme = new LinkedHashMap<String, Integer>();
-		String previousTheme="";
 		for(Properties p : res){
 			String theme = p.getProperty("eurovoc_theme");
-			if (!theme.equals(previousTheme)) 
-				eurovocMicrotheme = new LinkedHashMap<String, Integer>();
-			eurovocMicrotheme.put(p.getProperty("eurovoc_microtheme"), ((Long)p.get("c")).intValue());
-			map.put(theme, eurovocMicrotheme);
-			previousTheme = theme;
+			if(!map.containsKey(theme))
+				map.put(theme, new LinkedHashMap<String, Integer>());
+			map.get(theme).put(p.getProperty("eurovoc_microtheme"), ((Long)p.get("c")).intValue());
 		}
 		return map;	
 	}
