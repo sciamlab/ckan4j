@@ -23,13 +23,14 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.ws.rs.InternalServerErrorException;
+
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import com.sciamlab.ckan4j.CKANApiClient.CKANApiClientBuilder;
 import com.sciamlab.ckan4j.exception.CKANException;
 import com.sciamlab.common.dao.SciamlabDAO;
-import com.sciamlab.common.exception.InternalServerErrorException;
 import com.sciamlab.common.util.SciamlabCollectionUtils;
 
 public class CKANRating {
