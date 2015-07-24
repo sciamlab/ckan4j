@@ -29,6 +29,20 @@ public class CKANApiExtension {
 		return ((Long)dao.execQuery("select count(*) count from package where state='active';").get(0).get("count")).intValue();
 	}
 	
+	/**
+	 * Return the dataset count but based on opendata license
+	 * in case of licenses that identify not opendata these are counted
+ 	 * as not open datasets
+	 */
+	public Map<String,String> getDatasetStats() {
+		Map <String,String> map = new HashMap<String,String>();
+		List<Properties> res = dao.execQuery( "select * from stats_dataset_view;");
+		for(Properties p : res){
+			map.put(p.getProperty("type"), p.getProperty("dataset_nr"));
+		}
+		return map;
+	}
+	
 //	/**
 //	 * 
 //	 * @return
