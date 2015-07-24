@@ -34,11 +34,11 @@ public class CKANApiExtension {
 	 * in case of licenses that identify not opendata these are counted
  	 * as not open datasets
 	 */
-	public Map<String,String> getDatasetStats() {
-		Map <String,String> map = new HashMap<String,String>();
+	public Map<String,Long> getDatasetStats() {
+		Map <String,Long> map = new HashMap<String,Long>();
 		List<Properties> res = dao.execQuery( "select * from stats_dataset_view;");
 		for(Properties p : res){
-			map.put(p.getProperty("type"), p.getProperty("dataset_nr"));
+			map.put(p.getProperty("type"), ((java.math.BigDecimal) p.get("dataset_nr")).longValue() );
 		}
 		return map;
 	}
