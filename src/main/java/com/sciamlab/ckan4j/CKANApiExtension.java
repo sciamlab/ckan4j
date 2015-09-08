@@ -28,12 +28,6 @@ public class CKANApiExtension {
 	public int getDatasetCount() {
 		return ((Long)dao.execQuery("select count(*) count from package where state='active';").get(0).get("count")).intValue();
 	}
-	public int getOrganizationCount() {
-		return ((Long)dao.execQuery("select count(*) count from \"group\" where state='active' and type = 'organization';").get(0).get("count")).intValue();
-	}
-	public int getResourcesCount() {
-		return ((Long)dao.execQuery("select count(*) count from resource where state='active';").get(0).get("count")).intValue();
-	}
 	
 	/**
 	 * Return the dataset count but based on opendata license
