@@ -47,7 +47,7 @@ public class CKANApiClient {
 	
 	private static final String PACKAGE_LIST = "package_list";
 	private static final String GROUP_LIST = "group_list";
-	private static final String ORGANIZAION_LIST = "organizaion_list";
+	private static final String ORGANIZATION_LIST = "organization_list";
 	private static final String TAG_LIST = "tag_list";
 	private static final String USER_LIST = "user_list";
 	
@@ -192,7 +192,7 @@ public class CKANApiClient {
 	}
 	
 	public JSONArray organizationList() throws CKANException{
-		return (JSONArray) actionGET(ORGANIZAION_LIST, new MultivaluedHashMap<String, String>());
+		return (JSONArray) actionGET(ORGANIZATION_LIST, new MultivaluedHashMap<String, String>());
 	}
 	
 	public JSONArray tagList() throws CKANException{

@@ -14,6 +14,8 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.sciamlab.common.dao.SciamlabDAO;
+import com.sciamlab.common.exception.DAOException;
+import com.sciamlab.common.util.Pair;
 
 public class CKANApiExtension {
 
@@ -42,41 +44,6 @@ public class CKANApiExtension {
 		}
 		return map;
 	}
-	
-//	/**
-//	 * 
-//	 * @return
-//	 */
-//	public Map<String, Integer> getCategoriesCount() {
-//		Map<String, Integer> map = new LinkedHashMap<String, Integer>();
-//		Connection conn = null;
-//		Statement stmt = null;
-//		ResultSet rs = null;
-//		try {
-//			conn = getConnection();
-//			stmt = conn.createStatement();
-//			// Execute the query
-//			rs = stmt.executeQuery("select pe.value as category_id, count(*) as count"
-//					+ " from package_extra as pe join package as p on pe.package_id=p.id"
-//					+ " where pe.key='category_id' and p.private=false and p.state='active' group by pe.value;");
-//
-//			// Loop through the result set
-//			while (rs.next())
-//				map.put(rs.getString("category_id"),rs.getInt("count"));
-//
-//			// Close the result set, statement and the connection
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		} finally{
-//			if(rs!=null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
-//			if(stmt!=null) try { stmt.close(); } catch (SQLException e) { e.printStackTrace(); }
-//			if(conn!=null) try { conn.close(); } catch (SQLException e) { e.printStackTrace();	}
-//		}
-//
-//		return map;
-//	}
-//	
 	
 	/**
 	 * This method returns a map of the tags with the related count
@@ -169,21 +136,43 @@ public class CKANApiExtension {
 	public Map<String, Date> getOrganizationLastUpdateMap() {
 		Map<String, Date> map = new LinkedHashMap<String, Date>();
 		List<Properties> res = dao.execQuery("SELECT * FROM (SELECT \"group\".name, "+ 
-					"max(package.metadata_modified) as last_revision "+
-					"FROM \"group\" left join package on \"group\".id = package.owner_org "+
-					"WHERE \"group\".is_organization = true AND \"group\".state = 'active'" +
-					"GROUP BY \"group\".name ORDER BY last_revision desc) t WHERE last_revision IS NOT NULL;");
+				"max(package.metadata_modified) as last_revision "+
+				"FROM \"group\" left join package on \"group\".id = package.owner_org "+
+				"WHERE \"group\".is_organization = true AND \"group\".state = 'active'" +
+				"GROUP BY \"group\".name ORDER BY last_revision desc) t WHERE last_revision IS NOT NULL;");
 		for(Properties p : res){
 			map.put(p.getProperty("name"), (Date)p.get("last_revision"));
 		}
 		return map;
 	}
+	
+	/**
+	 * analytics about a pair of dimensions in (license_id, category, format, publisher, publisher_type) 
+	 * 
+	 * @param dimension1, the first dimension to analyze
+	 * @param dimension2, the second dimension to analyze
+	 * @return a map containing the pairs for any dimension1 and dimension2 combinations with the related count
+	 */
+	public Map<Pair<String, String>, Integer> getDimensionBasedStatistics(String dimension1, String dimension2) {
+		if(!DIMENSIONS.contains(dimension1))
+			throw new DAOException(dimension1 +" is not a valid dimension. Please use one in "+DIMENSIONS);
+		if(!DIMENSIONS.contains(dimension2))
+			throw new DAOException(dimension2 +" is not a valid dimension. Please use one in "+DIMENSIONS);
+		Map<Pair<String, String>, Integer> map = new LinkedHashMap<Pair<String, String>, Integer>();
+		List<Properties> res = dao.execQuery(
+				"select "+dimension1+", "+dimension2+", count(*) from odhubit_statistics group by "+dimension1+", "+dimension2+" order by count desc;");
+		for(Properties p : res){
+			map.put(new Pair<String, String>(p.getProperty(dimension1), p.getProperty(dimension2)), ((Long)p.get("count")).intValue());
+		}
+		return map;
+	}
+	private static final List<String> DIMENSIONS = new ArrayList<String>(){{add("license_id");add("category");add("format");add("publisher");add("publisher_type");}};
 
 	/**
-	 * Returns the last update date of the organization corresponding to the given name 
+	 * last update date of an organization 
 	 * 
-	 * @param name
-	 * @return
+	 * @param name of the organization
+	 * @return the last update date of the organization corresponding to the given name
 	 */
 	public Date getOrganizationLastUpdate(String name) {
 		final String id = getOrganizationId(name);
