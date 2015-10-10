@@ -1,3 +1,21 @@
+package com.sciamlab.ckan4j;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+
+import org.apache.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.sciamlab.ckan4j.exception.CKANException;
+import com.sciamlab.common.util.HTTPClient;
+
 /**
  * Copyright 2014 Sciamlab s.r.l.
  * 
@@ -12,29 +30,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-package com.sciamlab.ckan4j;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-
-import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.sciamlab.ckan4j.exception.CKANException;
-import com.sciamlab.common.util.HTTPClient;
-
-
-/**
- * 
- * @author SciamLab
- *
  */
 
 public class CKANApiClient {
@@ -86,14 +81,13 @@ public class CKANApiClient {
 						put("Authorization", new ArrayList<String>(){{ 
 							if(ckan_api_key!=null) add(ckan_api_key); 
 						}}); }}).readEntity(String.class);
-		} catch (MalformedURLException e) {
-			logger.error(e.getMessage(), e);
+		} catch (Exception e) {
+			throw new CKANException(e);
 		}
 		JSONObject result = null;
 		try {
 			result = new JSONObject(result_string);
 		} catch (JSONException e) {
-			logger.error(result_string, e);
 			throw new CKANException(e, result_string);
 		}
 		if(!result.has("success") || !result.getBoolean("success")){
@@ -151,7 +145,7 @@ public class CKANApiClient {
 	 * GET METHODS
 	 */
 	
-	private Object actionGET(String action, MultivaluedHashMap<String, String> params) throws CKANException{
+	public Object actionGET(String action, MultivaluedMap<String, String> params) throws CKANException{
 		String result_string = "";
 		try {
 			result_string = this.http.doGET(new URL(ckan_api_endpoint + "/action/" + action), params,
@@ -159,14 +153,13 @@ public class CKANApiClient {
 						put("Authorization", new ArrayList<String>(){{ 
 							if(ckan_api_key!=null) add(ckan_api_key); 
 						}}); }}).readEntity(String.class);
-		} catch (MalformedURLException e) {
-			logger.error(e.getMessage(), e);
+		} catch (Exception e) {
+			throw new CKANException(e);
 		}
 		JSONObject result;
 		try {
 			result = new JSONObject(result_string);
 		} catch (JSONException e) {
-			logger.error(result_string, e);
 			throw new CKANException(e);
 		}
 		if(!result.has("success") || !result.getBoolean("success")){
@@ -245,7 +238,7 @@ public class CKANApiClient {
 		private String ckan_api_key;
 		private final URL ckan_api_endpoint;
 		
-		public static CKANApiClientBuilder getInstance(String ckan_api_endpoint) throws MalformedURLException{
+		public static CKANApiClientBuilder init(String ckan_api_endpoint) throws MalformedURLException{
 			return new CKANApiClientBuilder(ckan_api_endpoint);
 		}
 		

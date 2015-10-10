@@ -35,17 +35,17 @@ public class CKANException extends Exception {
 		this.error = error;
 	}
 	
-	public CKANException(JSONException e){
+	public CKANException(Exception e){
 		super(e);
 		this.error = new JSONObject();
-		this.error.put("__type", "JSONException");
+		this.error.put("__type", e.getClass().getSimpleName());
 		this.error.put("message", e.getMessage());
 	}
 	
-	public CKANException(JSONException e, String text){
+	public CKANException(Exception e, String text){
 		super(e);
 		this.error = new JSONObject();
-		this.error.put("__type", "JSONException");
+		this.error.put("__type", e.getClass().getSimpleName());
 		this.error.put("message", e.getMessage());
 		this.error.put("text", text);
 	}

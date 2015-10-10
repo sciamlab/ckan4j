@@ -45,7 +45,7 @@ public class CKANRating {
 		this.dao = builder.dao;
 		this.rating_table = builder.rating_table;
 		try {
-			this.ckan = CKANApiClientBuilder.getInstance(builder.ckan_api_endpoint.toString()).apiKey(builder.ckan_api_key).build();
+			this.ckan = CKANApiClientBuilder.init(builder.ckan_api_endpoint.toString()).apiKey(builder.ckan_api_key).build();
 		} catch (MalformedURLException e) {
 			//should never be thrown
 			e.printStackTrace();
