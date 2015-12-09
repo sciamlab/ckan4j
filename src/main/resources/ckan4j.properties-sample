@@ -1,0 +1,27 @@
+ds.location = java:/comp/env/jdbc/ckan
+ckan.endpoint = 
+ckan.apikey = 
+rating.table = 
+categories.json = categories.json
+## this is the name of the dataset that contains one resource for each report processed by amaca
+publisher.reports.dataset = 
+
+google.api.oauth_endpoint = https://accounts.google.com/o/oauth2/token
+google.api.secret = 
+google.api.client_id = 
+google.api.app_name = 
+
+facebook.api.endpoint = https://graph.facebook.com
+facebook.api.secret = 
+facebook.api.client_id = 
+
+github.api.oauth_endpoint = https://github.com/login/oauth/access_token
+github.api.endpoint = https://api.github.com
+github.api.secret = 
+github.api.client_id = 
+
+twitter.api.endpoint = https://api.twitter.com
+twitter.api.secret = 
+twitter.api.client_id = 
+
+ckan.login.secret = 
