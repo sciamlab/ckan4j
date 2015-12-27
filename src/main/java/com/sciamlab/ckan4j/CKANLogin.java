@@ -89,7 +89,7 @@ public class CKANLogin {
 	 */
 	public Response autologin(String user, boolean remember) {
 		Date now = new Date();
-		String password_hashed = SciamlabHashUtils.signStringSHA1(now.getTime()/1000+user+secret);
+		String password_hashed = SciamlabHashUtils.sha1base64(now.getTime()/1000+user+secret);
 		return login(user, now.getTime()/1000+password_hashed, remember);
 	}
 	

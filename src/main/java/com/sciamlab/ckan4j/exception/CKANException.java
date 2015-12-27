@@ -15,7 +15,6 @@
  */
 package com.sciamlab.ckan4j.exception;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 /**

@@ -73,7 +73,7 @@ public class CKANApiClient {
 	
 	private Object actionPOST(String action, JSONObject body) throws CKANException{
 		String result_string = "";
-//		System.out.println(body);
+//		System.out.println(html);
 		try {
 			result_string = this.http.doPOST(new URL(ckan_api_endpoint + "/action/" + action), 
 					body.toString(), MediaType.APPLICATION_JSON_TYPE, null, 
