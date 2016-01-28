@@ -14,6 +14,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.sciamlab.ckan4j.exception.CKANException;
+import com.sciamlab.common.exception.InternalServerErrorException;
+import com.sciamlab.common.exception.SciamlabWebApplicationException;
 import com.sciamlab.common.util.HTTPClient;
 
 /**
@@ -162,8 +164,31 @@ public class CKANApiClient {
 		} catch (JSONException e) {
 			throw new CKANException(e);
 		}
-		if(!result.has("success") || !result.getBoolean("success")){
-//			System.out.println(result);
+		if(!result.has("success")){
+			//thrown as SciamlabWebApplicationException like :
+			/*
+			 * {
+			 *    error: "Internal Server Error",
+			 *    code: 500,
+			 *    msg: "bla bla"
+			 * } 
+			 */
+			if(result.has("code") && result.has("error"))
+				throw new SciamlabWebApplicationException(result.getInt("code"), result.getInt("code"), result.getString("error"), result.getString("msg"));
+			else
+				throw new InternalServerErrorException(result.toString());
+		}else if(!result.getBoolean("success")){
+			//thrown as CKAN internal exception like: 
+			/*
+			 * {
+			 *    help: "http://demo.ckan.org/api/3/action/help_show?name=organization_show",
+             *    success: false,
+             *    error: {
+			 *       message: "Not found",
+			 * 	    __type: "Not Found Error"
+			 * 	  }
+			 * } 
+			 */
 			throw new CKANException(result.getJSONObject("error"));
 		}
 		return result.get("result");

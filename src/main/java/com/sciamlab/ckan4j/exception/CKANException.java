@@ -48,7 +48,7 @@ public class CKANException extends Exception {
 		this.error.put("message", e.getMessage());
 		this.error.put("text", text);
 	}
-
+	
 	public JSONObject getError() {
 		return error;
 	}
