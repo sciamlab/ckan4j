@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -148,50 +149,52 @@ public class CKANApiClient {
 	 */
 	
 	public Object actionGET(String action, MultivaluedMap<String, String> params) throws CKANException{
-		String result_string = "";
 		try {
-			result_string = this.http.doGET(new URL(ckan_api_endpoint + "/action/" + action), params,
+			Response response = this.http.doGET(new URL(ckan_api_endpoint + "/action/" + action), params,
 					new MultivaluedHashMap<String, String>(){{ 
 						put("Authorization", new ArrayList<String>(){{ 
 							if(ckan_api_key!=null) add(ckan_api_key); 
-						}}); }}).readEntity(String.class);
+						}}); }});
+			JSONObject result;
+			try {
+				result = new JSONObject(response.readEntity(String.class));
+			} catch (JSONException e) {
+				throw new SciamlabWebApplicationException(response.getStatus(), response.getStatus(), response.getStatusInfo().toString(), null);
+			}
+			if(!result.has("success")){
+				//thrown as SciamlabWebApplicationException like :
+				/*
+				 * {
+				 *    error: "Internal Server Error",
+				 *    code: 500,
+				 *    msg: "bla bla"
+				 * } 
+				 */
+				if(result.has("code") && result.has("error"))
+					throw new SciamlabWebApplicationException(result.getInt("code"), result.getInt("code"), result.getString("error"), result.getString("msg"));
+				else
+					throw new InternalServerErrorException(result.toString());
+			}else if(!result.getBoolean("success")){
+				//thrown as CKAN internal exception like: 
+				/*
+				 * {
+				 *    help: "http://demo.ckan.org/api/3/action/help_show?name=organization_show",
+	             *    success: false,
+	             *    error: {
+				 *       message: "Not found",
+				 * 	    __type: "Not Found Error"
+				 * 	  }
+				 * } 
+				 */
+				throw new CKANException(result.getJSONObject("error"));
+			}
+			return result.get("result");
+			
+		} catch (CKANException | SciamlabWebApplicationException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new CKANException(e);
 		}
-		JSONObject result;
-		try {
-			result = new JSONObject(result_string);
-		} catch (JSONException e) {
-			throw new CKANException(e);
-		}
-		if(!result.has("success")){
-			//thrown as SciamlabWebApplicationException like :
-			/*
-			 * {
-			 *    error: "Internal Server Error",
-			 *    code: 500,
-			 *    msg: "bla bla"
-			 * } 
-			 */
-			if(result.has("code") && result.has("error"))
-				throw new SciamlabWebApplicationException(result.getInt("code"), result.getInt("code"), result.getString("error"), result.getString("msg"));
-			else
-				throw new InternalServerErrorException(result.toString());
-		}else if(!result.getBoolean("success")){
-			//thrown as CKAN internal exception like: 
-			/*
-			 * {
-			 *    help: "http://demo.ckan.org/api/3/action/help_show?name=organization_show",
-             *    success: false,
-             *    error: {
-			 *       message: "Not found",
-			 * 	    __type: "Not Found Error"
-			 * 	  }
-			 * } 
-			 */
-			throw new CKANException(result.getJSONObject("error"));
-		}
-		return result.get("result");
 	}
 	
 	public JSONArray packageList(final Integer limit, final Integer offset) throws CKANException{
