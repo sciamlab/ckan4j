@@ -15,8 +15,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.sciamlab.ckan4j.exception.CKANException;
-import com.sciamlab.common.exception.InternalServerErrorException;
-import com.sciamlab.common.exception.SciamlabWebApplicationException;
+import com.sciamlab.common.exception.web.InternalServerErrorException;
+import com.sciamlab.common.exception.web.SciamlabWebApplicationException;
 import com.sciamlab.common.util.HTTPClient;
 
 /**
