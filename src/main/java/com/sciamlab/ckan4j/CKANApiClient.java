@@ -15,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.sciamlab.ckan4j.exception.CKANException;
+import com.sciamlab.ckan4j.util.CKAN;
 import com.sciamlab.common.exception.web.InternalServerErrorException;
 import com.sciamlab.common.exception.web.SciamlabWebApplicationException;
 import com.sciamlab.common.util.HTTPClient;
@@ -41,7 +42,7 @@ public class CKANApiClient {
 	
 	private final String ckan_api_key;
 	private final URL ckan_api_endpoint;
-	private HTTPClient http = new HTTPClient();
+	private HTTPClient http;
 	
 	private static final String PACKAGE_LIST = "package_list";
 	private static final String GROUP_LIST = "group_list";
@@ -67,7 +68,7 @@ public class CKANApiClient {
 	private CKANApiClient(CKANApiClientBuilder builder) {
 		this.ckan_api_key = builder.ckan_api_key;
 		this.ckan_api_endpoint = builder.ckan_api_endpoint;
-		http = new HTTPClient();
+		http = builder.timeout!=null ? new HTTPClient(builder.timeout) : new HTTPClient();
 	}
 	
 	/*
@@ -265,6 +266,7 @@ public class CKANApiClient {
 		
 		private String ckan_api_key;
 		private final URL ckan_api_endpoint;
+		private Integer timeout = null;
 		
 		public static CKANApiClientBuilder init(String ckan_api_endpoint) throws MalformedURLException{
 			return new CKANApiClientBuilder(ckan_api_endpoint);
@@ -277,6 +279,11 @@ public class CKANApiClient {
 
 		public CKANApiClientBuilder apiKey(String ckan_api_key){
 			this.ckan_api_key = ckan_api_key;
+			return this;
+		}
+		
+		public CKANApiClientBuilder timeout(int timeout){
+			this.timeout = timeout;
 			return this;
 		}
 		
