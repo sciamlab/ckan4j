@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.DateFormat;
@@ -24,8 +23,8 @@ import org.json.JSONException;
 
 import com.sciamlab.ckan4j.exception.CKANException;
 import com.sciamlab.common.model.mdr.vocabulary.EUNamedAuthorityDataTheme;
-import com.sciamlab.common.util.SciamlabMailUtils.SciamlabVelocityHelper;
 import com.sciamlab.common.util.SciamlabStreamUtils;
+import com.sciamlab.common.util.SciamlabVelocityHelper;
 
 public class CKANSitemapGenerator {
 	
@@ -98,7 +97,7 @@ public class CKANSitemapGenerator {
 		
 				Properties props = new Properties();
 				props.put("body", bArr.get(i).toString());
-				String out = SciamlabVelocityHelper.getTemplateFromString(null, props, sitemap_template);
+				String out = new SciamlabVelocityHelper.Builder().build().getTemplateFromString(props, sitemap_template);
 				FileWriter writer = new FileWriter(new File(fileName));
 				writer.append(out);
 				writer.close();
