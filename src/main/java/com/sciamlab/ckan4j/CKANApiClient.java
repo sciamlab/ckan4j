@@ -60,10 +60,12 @@ public class CKANApiClient {
 	private static final String PACKAGE_UPDATE = "package_update";
 	private static final String PACKAGE_CREATE = "package_create";
 	private static final String PACKAGE_DELETE = "package_delete";
+	private static final String PACKAGE_PURGE  = "package_purge";
 	
 	private static final String ORGANIZATION_UPDATE = "organization_update";
 	private static final String ORGANIZATION_CREATE = "organization_create";
 	private static final String ORGANIZATION_DELETE = "organization_delete";
+	private static final String ORGANIZATION_PURGE  = "organization_purge";
 
 	private CKANApiClient(CKANApiClientBuilder builder) {
 		this.ckan_api_key = builder.ckan_api_key;
@@ -108,6 +110,13 @@ public class CKANApiClient {
 		return true;
 	}
 	
+	public boolean packagePurge(final String name) throws CKANException{
+		JSONObject json = new JSONObject();
+		json.put("id", name);
+		Object result = actionPOST(PACKAGE_PURGE, json);
+		return true;
+	}
+	
 	public JSONObject packageUpdate(final JSONObject dataset) throws CKANException{
 		return (JSONObject) actionPOST(PACKAGE_UPDATE, dataset);
 	}
@@ -120,6 +129,15 @@ public class CKANApiClient {
 		JSONObject json = new JSONObject();
 		json.put("id", name);
 		Object result = actionPOST(ORGANIZATION_DELETE, json);
+		logger.debug("Organization successfully deleted : "+name);
+		return true;
+	}
+	
+	public boolean organizationPurge(final String name) throws CKANException{
+		JSONObject json = new JSONObject();
+		json.put("id", name);
+		Object result = actionPOST(ORGANIZATION_PURGE, json);
+		logger.debug("Organization successfully purged : "+name);
 		return true;
 	}
 	

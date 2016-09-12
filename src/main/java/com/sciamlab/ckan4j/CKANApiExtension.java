@@ -2,6 +2,7 @@ package com.sciamlab.ckan4j;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,12 +24,24 @@ public class CKANApiExtension {
 	
 	private SciamlabDAO dao;
 	
-	private CKANApiExtension(CKANApiExtensionBuilder builder) {
+	private CKANApiExtension(Builder builder) {
 		this.dao = builder.dao;
 	}
 	
 	public int getDatasetCount() {
 		return ((Long)dao.execQuery("select count(*) count from package where state='active';").get(0).get("count")).intValue();
+	}
+	
+	/**
+	 * return the collection of deleted dataset names (useful for purging) 
+	 * @return
+	 */
+	public Collection<String> getDatasetDeleted() {
+		List<Properties> result = dao.execQuery("select id from package where state='deleted'");
+		Collection<String> deleted = new ArrayList<String>();
+		for(Properties p : result)
+			deleted.add(p.getProperty("id"));
+		return deleted;
 	}
 	
 	/**
@@ -265,16 +278,11 @@ public class CKANApiExtension {
 		}
     }
 	
-	public static class CKANApiExtensionBuilder{
+	public static class Builder{
 		
 		private final SciamlabDAO dao;
 		
-		public static CKANApiExtensionBuilder getInstance(SciamlabDAO dao){
-			return new CKANApiExtensionBuilder(dao);
-		}
-		
-		private CKANApiExtensionBuilder(SciamlabDAO dao) {
-			super();
+		public Builder(SciamlabDAO dao) {
 			this.dao = dao;
 		}
 
