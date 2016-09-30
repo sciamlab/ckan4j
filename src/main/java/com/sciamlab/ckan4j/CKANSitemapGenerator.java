@@ -22,6 +22,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.sciamlab.ckan4j.exception.CKANException;
+import com.sciamlab.common.exception.SciamlabException;
+import com.sciamlab.common.model.mdr.EUNamedAuthorityEntry;
+import com.sciamlab.common.model.mdr.EUNamedAuthorityVocabulary;
+import com.sciamlab.common.model.mdr.EUNamedAuthorityVocabularyMap;
 import com.sciamlab.common.model.mdr.vocabulary.EUNamedAuthorityDataTheme;
 import com.sciamlab.common.util.SciamlabStreamUtils;
 import com.sciamlab.common.util.SciamlabVelocityHelper;
@@ -42,6 +46,7 @@ public class CKANSitemapGenerator {
 		private final String ckan_portal_baseurl;
 		private final List<String> portal_languages = new ArrayList<String>();
 		private String sitemap_template_file = "sitemap-template.xml";
+		private String sitemap_template;
 		
 		public Builder(String portal_base_url, CKANApiClient client){
 			
@@ -64,13 +69,15 @@ public class CKANSitemapGenerator {
 			return this;
 		}
 		
-		public CKANSitemapGenerator build() throws FileNotFoundException{
+		public CKANSitemapGenerator build() throws FileNotFoundException, SciamlabException{
+			EUNamedAuthorityVocabularyMap.load(EUNamedAuthorityVocabulary.DATA_THEME);
+			this.sitemap_template = SciamlabStreamUtils.convertStreamToString(SciamlabStreamUtils.getInputStream(this.sitemap_template_file));
 			return new CKANSitemapGenerator(this);
 		}
 	}
 	
-	private CKANSitemapGenerator(Builder builder) throws FileNotFoundException {
-		this.sitemap_template = SciamlabStreamUtils.convertStreamToString(SciamlabStreamUtils.getInputStream(builder.sitemap_template_file));
+	private CKANSitemapGenerator(Builder builder) {
+		this.sitemap_template = builder.sitemap_template;
 		this.client = builder.client;
 		this.ckan_portal_baseurl = builder.ckan_portal_baseurl;
 		this.portal_languages = builder.portal_languages;
@@ -159,8 +166,9 @@ public class CKANSitemapGenerator {
 	private List<String> getThemesURL() throws CKANException, UnsupportedEncodingException, JSONException {
 		List<String> list = new ArrayList<String>();
 		
-		for (EUNamedAuthorityDataTheme.Theme theme : Arrays.asList(EUNamedAuthorityDataTheme.Theme.values())) {
-			String url = "/dataset?extras_dcat-category-id=" + URLEncoder.encode(theme.name(), "UTF-8");
+//		for (EUNamedAuthorityDataTheme.Theme theme : Arrays.asList(EUNamedAuthorityDataTheme.Theme.values())) {
+		for (EUNamedAuthorityDataTheme theme : EUNamedAuthorityVocabularyMap.<EUNamedAuthorityDataTheme>get(EUNamedAuthorityVocabulary.DATA_THEME).values()) {
+			String url = "/dataset?extras_dcat-category-id=" + URLEncoder.encode(theme.authority_code, "UTF-8");
 			list.add(url);
 		}
 		

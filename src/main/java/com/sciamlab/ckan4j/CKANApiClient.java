@@ -1,5 +1,6 @@
 package com.sciamlab.ckan4j;
 
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -15,7 +16,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.sciamlab.ckan4j.exception.CKANException;
-import com.sciamlab.ckan4j.util.CKAN;
 import com.sciamlab.common.exception.web.InternalServerErrorException;
 import com.sciamlab.common.exception.web.SciamlabWebApplicationException;
 import com.sciamlab.common.util.HTTPClient;
@@ -36,14 +36,17 @@ import com.sciamlab.common.util.HTTPClient;
  * limitations under the License.
  */
 
-public class CKANApiClient {
+public class CKANApiClient implements Serializable{
 	
+	private static final long serialVersionUID = 1L;
+
 	private static final Logger logger = Logger.getLogger(CKANApiClient.class);
 	
 	private final String ckan_api_key;
 	private final URL ckan_api_endpoint;
-	private HTTPClient http;
-	
+	private final HTTPClient http;
+	private final Integer timeout;
+
 	private static final String PACKAGE_LIST = "package_list";
 	private static final String GROUP_LIST = "group_list";
 	private static final String ORGANIZATION_LIST = "organization_list";
@@ -70,6 +73,7 @@ public class CKANApiClient {
 	private CKANApiClient(CKANApiClientBuilder builder) {
 		this.ckan_api_key = builder.ckan_api_key;
 		this.ckan_api_endpoint = builder.ckan_api_endpoint;
+		this.timeout = builder.timeout;
 		http = builder.timeout!=null ? new HTTPClient(builder.timeout) : new HTTPClient();
 	}
 	
@@ -81,7 +85,8 @@ public class CKANApiClient {
 		String result_string = "";
 //		System.out.println(html);
 		try {
-			result_string = this.http.doPOST(new URL(ckan_api_endpoint + "/action/" + action), 
+//			HTTPClient http = this.timeout!=null ? new HTTPClient(this.timeout) : new HTTPClient();
+			result_string = http.doPOST(new URL(ckan_api_endpoint + "/action/" + action), 
 					body.toString(), MediaType.APPLICATION_JSON_TYPE, null, 
 					new MultivaluedHashMap<String, String>(){{ 
 						put("Authorization", new ArrayList<String>(){{ 
@@ -169,7 +174,8 @@ public class CKANApiClient {
 	
 	public Object actionGET(String action, MultivaluedMap<String, String> params) throws CKANException{
 		try {
-			Response response = this.http.doGET(new URL(ckan_api_endpoint + "/action/" + action), params,
+//			HTTPClient http = this.timeout!=null ? new HTTPClient(this.timeout) : new HTTPClient();
+			Response response = http.doGET(new URL(ckan_api_endpoint + "/action/" + action), params,
 					new MultivaluedHashMap<String, String>(){{ 
 						put("Authorization", new ArrayList<String>(){{ 
 							if(ckan_api_key!=null) add(ckan_api_key); 
