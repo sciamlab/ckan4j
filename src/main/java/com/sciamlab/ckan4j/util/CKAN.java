@@ -24,6 +24,7 @@ public class CKAN {
 	public static final String LICENSE_NAME = "license_name";
 	public static final String LICENSE_TITLE = "license_title";
 	public static final String FORMAT = "format";
+	public static final String SIZE = "size";
 	public static final String DESCRIPTION = "description";
 	public static final String EXTRAS = "extras";
 	public static final String SPATIAL = "spatial";

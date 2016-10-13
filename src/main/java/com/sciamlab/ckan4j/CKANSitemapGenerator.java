@@ -9,7 +9,6 @@ import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -18,12 +17,13 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.log.Log4JLogChute;
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import com.sciamlab.ckan4j.exception.CKANException;
 import com.sciamlab.common.exception.SciamlabException;
-import com.sciamlab.common.model.mdr.EUNamedAuthorityEntry;
 import com.sciamlab.common.model.mdr.EUNamedAuthorityVocabulary;
 import com.sciamlab.common.model.mdr.EUNamedAuthorityVocabularyMap;
 import com.sciamlab.common.model.mdr.vocabulary.EUNamedAuthorityDataTheme;
@@ -36,7 +36,12 @@ public class CKANSitemapGenerator {
 	
 	private final List<String> portal_languages;
 	private static final int max_number_of_entries_per_file = 50000;
-	
+	private static final SciamlabVelocityHelper VELOCITY = new SciamlabVelocityHelper.Builder(new Properties() {{
+			put(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, "org.apache.velocity.runtime.log.Log4JLogChute");
+			put(Log4JLogChute.RUNTIME_LOG_LOG4J_LOGGER, "Log4JLogChute");
+			put(RuntimeConstants.RUNTIME_LOG, "/tmp/velocity.log");
+		}}).build();
+
 	private final String sitemap_template ;
 	private final CKANApiClient client;
 	private final String ckan_portal_baseurl;
@@ -44,12 +49,11 @@ public class CKANSitemapGenerator {
 	public static class Builder{
 		private final CKANApiClient client;
 		private final String ckan_portal_baseurl;
-		private final List<String> portal_languages = new ArrayList<String>();
+		private final List<String> portal_languages = new ArrayList<String>(){{add("");}};
 		private String sitemap_template_file = "sitemap-template.xml";
 		private String sitemap_template;
 		
 		public Builder(String portal_base_url, CKANApiClient client){
-			
 			this.ckan_portal_baseurl = portal_base_url;
 			this.client = client;
 		}
@@ -96,7 +100,7 @@ public class CKANSitemapGenerator {
 		map.put("theme", getThemesURL());	
 		
 		for(Entry<String, List<String>> entry : map.entrySet()){
-				
+			
 			List<StringBuilder> bArr = buildXML(entry.getValue());
 			
 			for (int i = 0; i < bArr.size(); i++) {
@@ -122,6 +126,90 @@ public class CKANSitemapGenerator {
 		writer.append(main.toString());
 		writer.close();
 		logger.info("sitemap.xml generated");
+	}
+	
+	public List<StringBuffer> generate(String name, String sitemap_baseurl) throws UnsupportedEncodingException, JSONException, CKANException, SciamlabException{
+		List<StringBuffer> list = new ArrayList<StringBuffer>();
+
+		String fileName = name+".xml";
+		StringBuffer main = new StringBuffer();
+		list.add(main);
+		main.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+		main.append("\n<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
+		
+		List<String> urls;
+		if("organization".equals(name))
+			urls = getOrganizationsURL();
+		else if("package".equals(name))
+			urls = getPackagesURL();
+		else if("tag".equals(name))
+			urls = getTagsURL();
+		else if("theme".equals(name))
+			urls = getThemesURL();
+		else
+			throw new SciamlabException("sitemap name not recognized");
+		
+		/*
+		 * considering each url is replicated for each language
+		 * the page size is evaluated as the max number of items per page divided by the number of languages
+		 */
+		final int page_size = max_number_of_entries_per_file/portal_languages.size();
+		/*
+		 * the number of pages is the number of urls divided by the page size
+		 * plus 1 if the rest is not 0
+		 */
+		int pages = urls.size()/page_size;
+		if(urls.size()%page_size!=0)
+			pages++;
+		int i=0;
+		int start=i;
+		int end = page_size>urls.size() ? urls.size() : page_size;
+		while(true){
+			StringBuffer xml = generate(urls.subList(start, end));
+			
+			Properties props = new Properties();
+			props.put("body", xml.toString());
+			String out = VELOCITY.getTemplateFromString(props, sitemap_template);
+			list.add(new StringBuffer(out));
+			
+			main.append("\n\t<sitemap>");
+			main.append("\n\t\t<loc>"+sitemap_baseurl+"/"+fileName+"/"+(i+1)+"</loc>");
+			main.append("\n\t</sitemap>");
+			
+			i++;
+			start = start + page_size;
+			if(start>=urls.size())
+				break;
+			end = end+page_size>urls.size() ? urls.size() : end+page_size;
+		}
+		main.append("\n</sitemapindex>");
+		return list;
+	}
+	
+	private StringBuffer generate(List<String> urls) {
+		
+		StringBuffer b = new StringBuffer();
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+		String currentDate = df.format(new Date());
+		
+		for (String url: urls){
+			for (String lang : portal_languages) {
+				String portalUrl = ckan_portal_baseurl + (!"".equals(lang) ? ("/" + lang) : "") + url;
+				b.append("<url>\n");
+				b.append("\t<loc>" + portalUrl + "</loc>\n");
+				for (String lang_again : portal_languages) {
+					if("".equals(lang_again))
+						continue;
+					String portalLocUrl = ckan_portal_baseurl + "/" + lang_again + url;
+					b.append("\t<xhtml:link rel=\"alternate\" hreflang=\"" + lang_again + "\" href=\"" + portalLocUrl + "\"/>\n");
+				}
+				b.append("\t<lastmod>" + currentDate + "+00:00</lastmod>\n");
+				b.append("\t<changefreq>monthly</changefreq>\n");
+				b.append("\t<priority>0.8000</priority>\n");
+				b.append("</url>\n");
+			}
+		}
+		return b;
 	}
 	
 	private List<String> getOrganizationsURL() throws CKANException, UnsupportedEncodingException, JSONException {
@@ -193,12 +281,14 @@ public class CKANSitemapGenerator {
 					b = new StringBuilder();
 				}
 					
-				String portalUrl = ckan_portal_baseurl + "/" + lang + url;
+				String portalUrl = ckan_portal_baseurl + (!"".equals(lang) ? ("/" + lang) : "") + url;
 				
 				b.append("<url>\n");
 				b.append("\t<loc>" + portalUrl + "</loc>\n");
 				
 				for (String lang_again : portal_languages) {
+					if("".equals(lang_again))
+						continue;
 					String portalLocUrl = ckan_portal_baseurl + "/" + lang_again + url;
 					b.append("\t<xhtml:link rel=\"alternate\" hreflang=\"" + lang_again + "\" href=\"" + portalLocUrl + "\"/>\n");
 				}
@@ -214,7 +304,6 @@ public class CKANSitemapGenerator {
 		
 		bArr.add(b);
 		b = new StringBuilder();
-				
 		return bArr;
 	}
 	
