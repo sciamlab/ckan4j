@@ -277,8 +277,11 @@ public class CKANApiClient implements Serializable{
 			}});
 	}	
 	
-	public JSONObject tagShow(final String id) throws CKANException{
-		return (JSONObject) actionGET(TAG_SHOW, new MultivaluedHashMap<String, String>(){{ put("id", new ArrayList<String>(){{ add(id); }}); }});
+	public JSONObject tagShow(final String id, final Boolean include_datasets) throws CKANException{
+		return (JSONObject) actionGET(TAG_SHOW, new MultivaluedHashMap<String, String>(){{ 
+				put("id", new ArrayList<String>(){{ add(id); }});
+				put("include_datasets", new ArrayList<String>(){{ add(include_datasets.toString()); }});
+			}});
 	}	
 	
 	public JSONObject userShow(final String id) throws CKANException{
