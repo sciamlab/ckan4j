@@ -256,7 +256,7 @@ public class CKANSitemapGenerator {
 		
 //		for (EUNamedAuthorityDataTheme.Theme theme : Arrays.asList(EUNamedAuthorityDataTheme.Theme.values())) {
 		for (EUNamedAuthorityDataTheme theme : EUNamedAuthorityVocabularyMap.<EUNamedAuthorityDataTheme>get(EUNamedAuthorityVocabulary.DATA_THEME).values()) {
-			String url = "/dataset?extras_dcat-category-id=" + URLEncoder.encode(theme.authority_code, "UTF-8");
+			String url = "/dataset?groups=" + URLEncoder.encode(theme.authority_code, "UTF-8");
 			list.add(url);
 		}
 		
