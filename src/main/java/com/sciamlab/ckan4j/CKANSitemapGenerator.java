@@ -87,47 +87,6 @@ public class CKANSitemapGenerator {
 		this.portal_languages = builder.portal_languages;
 	}
 	
-	public void generate() throws IOException, JSONException, CKANException{
-		
-		StringBuffer main = new StringBuffer();
-		main.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-		main.append("\n<sitemapindex xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">");
-		
-		Map<String, List<String>> map = new HashMap<String, List<String>>();
-		map.put("organization", getOrganizationsURL());
-		map.put("package", getPackagesURL());
-		map.put("tag", getTagsURL());	
-		map.put("theme", getThemesURL());	
-		
-		for(Entry<String, List<String>> entry : map.entrySet()){
-			
-			List<StringBuilder> bArr = buildXML(entry.getValue());
-			
-			for (int i = 0; i < bArr.size(); i++) {
-				String fileName = "sitemap_"+entry.getKey()+"_" + i + ".xml";
-		
-				Properties props = new Properties();
-				props.put("body", bArr.get(i).toString());
-				String out = new SciamlabVelocityHelper.Builder().build().getTemplateFromString(props, sitemap_template);
-				FileWriter writer = new FileWriter(new File(fileName));
-				writer.append(out);
-				writer.close();
-				
-				logger.info(fileName + " generated");
-				main.append("\n\t<sitemap>");
-				main.append("\n\t\t<loc>"+ckan_portal_baseurl+"/"+fileName+"</loc>");
-				main.append("\n\t</sitemap>");
-			}
-		
-		}
-		
-		main.append("\n</sitemapindex>");
-		FileWriter writer = new FileWriter(new File("sitemap.xml"));
-		writer.append(main.toString());
-		writer.close();
-		logger.info("sitemap.xml generated");
-	}
-	
 	public List<StringBuffer> generate(String name, String sitemap_baseurl) throws UnsupportedEncodingException, JSONException, CKANException, SciamlabException{
 		List<StringBuffer> list = new ArrayList<StringBuffer>();
 
@@ -261,50 +220,6 @@ public class CKANSitemapGenerator {
 		}
 		
 		return list;
-	}
-	
-	private List<StringBuilder> buildXML(List<String> urls) {
-		List<StringBuilder> bArr = new ArrayList<StringBuilder>();
-		StringBuilder b = new StringBuilder();
-		
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-		
-		String currentDate = df.format(new Date());
-		
-		int num = 0;
-		for (String url: urls){
-			
-			for (String lang : portal_languages) {
-				if (num%max_number_of_entries_per_file == max_number_of_entries_per_file-1) {
-					logger.debug("Reached maximum number of entries per sitemap file: "+num+". Creating a new file...");
-					bArr.add(b);
-					b = new StringBuilder();
-				}
-					
-				String portalUrl = ckan_portal_baseurl + (!"".equals(lang) ? ("/" + lang) : "") + url;
-				
-				b.append("<url>\n");
-				b.append("\t<loc>" + portalUrl + "</loc>\n");
-				
-				for (String lang_again : portal_languages) {
-					if("".equals(lang_again))
-						continue;
-					String portalLocUrl = ckan_portal_baseurl + "/" + lang_again + url;
-					b.append("\t<xhtml:link rel=\"alternate\" hreflang=\"" + lang_again + "\" href=\"" + portalLocUrl + "\"/>\n");
-				}
-				
-				b.append("\t<lastmod>" + currentDate + "+00:00</lastmod>\n");
-				b.append("\t<changefreq>monthly</changefreq>\n");
-				b.append("\t<priority>0.8000</priority>\n");
-				b.append("</url>\n");
-				
-				num++;
-			}
-		}
-		
-		bArr.add(b);
-		b = new StringBuilder();
-		return bArr;
 	}
 	
 }
